@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:optics/optics.dart';
 
 // some dummy data to create a Person with
-const String dataRaw = '{"id":"1","firstName":"John","lastName":"Doe","isRelatedTo":{"id":"2","firstName":"Jane","lastName":"Smith"}}';
+const String dataRaw = '{"id":"1","firstName":"John","lastName":"Doe","address":{"street":"Sesame Street","number":"1A","town":"Antwerp","country":"Belgium"}}';
 
 main(List<String> args) {
   _unmodified();
@@ -78,10 +78,8 @@ void _modifyStepped() {
   subject = subject
       .lens((template) => template.firstName = 'Billie')
       .lens((template) => template.lastName = 'The Kid')
-      .lens((template) => template.isRelatedTo.firstName = 'Calamity')
-      .lens((template) => template.isRelatedTo.lastName = 'Jane')
-      .lens((template) => template.isRelatedTo.isRelatedTo.firstName = 'Pistol')
-      .lens((template) => template.isRelatedTo.isRelatedTo.lastName = 'Pete');
+      .lens((template) => template.address.street = 'Race')
+      .lens((template) => template.address.number = '23');
 
   _prettyPrint(subject);
 
@@ -117,10 +115,8 @@ void _modifyBatched() {
       .lens((template) {
         template.firstName = 'Billie';
         template.lastName = 'The Kid';
-        template.isRelatedTo.firstName = 'Calamity';
-        template.isRelatedTo.lastName = 'Jane';
-        template.isRelatedTo.isRelatedTo.firstName = 'Pistol';
-        template.isRelatedTo.isRelatedTo.lastName = 'Pete';
+        template.address.street = 'Race';
+        template.address.number = '23';
       });
 
   _prettyPrint(subject);
@@ -152,7 +148,7 @@ void _modifyDeepNested() {
   PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
 
   subject = subject
-      .lens((template) => template.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.firstName = 'auntie Hattie');
+      .lens((template) => template.address.landLord.address.landLord.address.landLord.address.street = 'far far away');
 
   _prettyPrint(subject);
 
@@ -209,7 +205,7 @@ void _reference() {
   PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
 
   subject = subject
-      .lens((template) => template.isRelatedTo.isRelatedTo = subject);
+      .lens((template) => template.address.landLord = subject);
 
   _prettyPrint(subject);
 
