@@ -22,6 +22,20 @@ void _unmodified() {
   final Person subject = new PersonImpl(JSON.decode(dataRaw));
 
   _prettyPrint(subject);
+
+  /*
+      {
+          "id": "1",
+          "firstName": "John",
+          "lastName": "Doe",
+          "isRelatedTo": {
+              "id": "2",
+              "firstName": "Jane",
+              "lastName": "Smith",
+              "isRelatedTo": null
+          }
+      }
+   */
 }
 
 /*
@@ -55,6 +69,25 @@ void _modifyStepped() {
       .lens((template) => template.isRelatedTo.isRelatedTo.lastName = 'Pete');
 
   _prettyPrint(subject);
+
+  /*
+      {
+          "id": "1",
+          "firstName": "Billie",
+          "lastName": "The Kid",
+          "isRelatedTo": {
+              "id": "2",
+              "firstName": "Calamity",
+              "lastName": "Jane",
+              "isRelatedTo": {
+                  "id": null,
+                  "firstName": "Pistol",
+                  "lastName": "Pete",
+                  "isRelatedTo": null
+              }
+          }
+      }
+   */
 }
 
 /*
@@ -76,6 +109,25 @@ void _modifyBatched() {
       });
 
   _prettyPrint(subject);
+
+  /*
+      {
+          "id": "1",
+          "firstName": "Billie",
+          "lastName": "The Kid",
+          "isRelatedTo": {
+              "id": "2",
+              "firstName": "Calamity",
+              "lastName": "Jane",
+              "isRelatedTo": {
+                  "id": null,
+                  "firstName": "Pistol",
+                  "lastName": "Pete",
+                  "isRelatedTo": null
+              }
+          }
+      }
+   */
 }
 
 /*
@@ -88,6 +140,50 @@ void _modifyDeepNested() {
       .lens((template) => template.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.isRelatedTo.firstName = 'auntie Hattie');
 
   _prettyPrint(subject);
+
+  /*
+    {
+          "id": "1",
+          "firstName": "John",
+          "lastName": "Doe",
+          "isRelatedTo": {
+              "id": "2",
+              "firstName": "Jane",
+              "lastName": "Smith",
+              "isRelatedTo": {
+                  "id": null,
+                  "firstName": null,
+                  "lastName": null,
+                  "isRelatedTo": {
+                      "id": null,
+                      "firstName": null,
+                      "lastName": null,
+                      "isRelatedTo": {
+                          "id": null,
+                          "firstName": null,
+                          "lastName": null,
+                          "isRelatedTo": {
+                              "id": null,
+                              "firstName": null,
+                              "lastName": null,
+                              "isRelatedTo": {
+                                  "id": null,
+                                  "firstName": null,
+                                  "lastName": null,
+                                  "isRelatedTo": {
+                                      "id": null,
+                                      "firstName": "auntie Hattie",
+                                      "lastName": null,
+                                      "isRelatedTo": null
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+   */
 }
 
 /*
@@ -101,6 +197,30 @@ void _reference() {
       .lens((template) => template.isRelatedTo.isRelatedTo = subject);
 
   _prettyPrint(subject);
+
+  /*
+    {
+        "id": "1",
+        "firstName": "John",
+        "lastName": "Doe",
+        "isRelatedTo": {
+            "id": "2",
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "isRelatedTo": {
+                "id": "1",
+                "firstName": "John",
+                "lastName": "Doe",
+                "isRelatedTo": {
+                    "id": "2",
+                    "firstName": "Jane",
+                    "lastName": "Smith",
+                    "isRelatedTo": null
+                }
+            }
+        }
+    }
+   */
 }
 
 // pretty JSON printer
