@@ -14,6 +14,21 @@ main(List<String> args) {
 }
 
 /*
+ * NOTE:
+ * Below functionality wouldn't be possible without source_gen
+ * The only thing the user would have to manually create, it the interface, for example:
+ *
+ *
+    abstract class Person {
+
+      String get id, firstName, lastName;
+
+      Person get isRelatedTo;
+    }
+ *
+ */
+
+/*
  * Basic object example,
  * no lensing,
  * just deserializing from JSON to immutable Person / PersonImpl

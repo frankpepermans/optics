@@ -4,6 +4,7 @@
 .buildlog
 .packages
 .project
+.idea
 .pub/
 build/
 **/packages/
