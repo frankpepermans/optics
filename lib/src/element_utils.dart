@@ -38,11 +38,11 @@ abstract class PropertyData {
 
 class DefaultPropertyData implements PropertyData {
 
-  final PropertyAccessorElement property;
-  final String asImmutableDisplayName;
-  final String asMutableDisplayName;
-  final String asInterfaceDisplayName;
-  final String genericType = null;
+  @override final PropertyAccessorElement property;
+  @override final String asImmutableDisplayName;
+  @override final String asMutableDisplayName;
+  @override final String asInterfaceDisplayName;
+  @override final String genericType = null;
 
   DefaultPropertyData(PropertyAccessorElement property) :
         this.property = property,
@@ -54,11 +54,11 @@ class DefaultPropertyData implements PropertyData {
 
 class CustomObjectData implements PropertyData {
 
-  final PropertyAccessorElement property;
-  final String asImmutableDisplayName;
-  final String asMutableDisplayName;
-  final String asInterfaceDisplayName;
-  final String genericType = null;
+  @override final PropertyAccessorElement property;
+  @override final String asImmutableDisplayName;
+  @override final String asMutableDisplayName;
+  @override final String asInterfaceDisplayName;
+  @override final String genericType = null;
 
   CustomObjectData(PropertyAccessorElement property) :
         this.property = property,
@@ -69,11 +69,11 @@ class CustomObjectData implements PropertyData {
 
 class ListData implements PropertyData {
 
-  final PropertyAccessorElement property;
-  final String asImmutableDisplayName;
-  final String asMutableDisplayName;
-  final String asInterfaceDisplayName;
-  final String genericType;
+  @override final PropertyAccessorElement property;
+  @override final String asImmutableDisplayName;
+  @override final String asMutableDisplayName;
+  @override final String asInterfaceDisplayName;
+  @override final String genericType;
 
   ListData(PropertyAccessorElement property) :
         this.property = property,

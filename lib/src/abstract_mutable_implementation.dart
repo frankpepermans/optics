@@ -15,7 +15,7 @@ class AbstractMutableImplementation extends ClassBuilder {
 
     final utils.PropertyData propertyData = utils.getPropertyData(property);
 
-    buffer.writeln('${propertyData.asMutableDisplayName} get ${property.displayName};');
+    buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName};');
     buffer.writeln('set ${property.displayName}(${propertyData.asInterfaceDisplayName} value);');
 
     return buffer.toString();

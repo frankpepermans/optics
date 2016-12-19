@@ -8,4 +8,4 @@ final PhaseGroup phases = new PhaseGroup.singleAction(
       const OpticsGenerator()
     ]),
     new InputSet('optics',
-        const ['test/domain.dart']));
+        const <String>['test/domain.dart']));

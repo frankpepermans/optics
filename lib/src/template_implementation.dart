@@ -26,19 +26,19 @@ class TemplateImplementation extends ClassBuilder {
     final utils.PropertyData propertyData = utils.getPropertyData(property);
 
     if (propertyData is utils.CustomObjectData) {
-      buffer.writeln('${propertyData.asMutableDisplayName} get ${property.displayName} {');
+      buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName} {');
       buffer.writeln('''if (_mutations['${property.displayName}'] == null) _mutations['${property.displayName}'] = new _${propertyData.asInterfaceDisplayName}Template(null);''');
       buffer.writeln('''return _mutations['${property.displayName}'];}''');
     } else if (propertyData is utils.ListData) {
-      buffer.writeln('${propertyData.asMutableDisplayName} get ${property.displayName} {');
+      buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName} {');
       buffer.writeln('''if (_mutations['${property.displayName}'] == null) _mutations['${property.displayName}'] = <${propertyData.genericType}>[];''');
       buffer.writeln('''if (_mutations['${property.displayName}'].firstWhere((${propertyData.genericType} entry) => entry is! _${propertyData.genericType}Template, orElse: () => null) != null) _mutations['${property.displayName}'] = _mutations['${property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template ? entry : new _${propertyData.genericType}Template(entry)).toList();''');
       buffer.writeln('''return _mutations['${property.displayName}'];}''');
     } else {
-      buffer.writeln('''${propertyData.asMutableDisplayName} get ${property.displayName} => _mutations['${property.displayName}'];''');
+      buffer.writeln('''@override ${propertyData.asMutableDisplayName} get ${property.displayName} => _mutations['${property.displayName}'];''');
     }
 
-    buffer.writeln('''set ${property.displayName}(${propertyData.asInterfaceDisplayName} value) {_mutations['${property.displayName}'] = value;}''');
+    buffer.writeln('''@override set ${property.displayName}(${propertyData.asInterfaceDisplayName} value) {_mutations['${property.displayName}'] = value;}''');
 
     return buffer.toString();
   }
@@ -47,7 +47,7 @@ class TemplateImplementation extends ClassBuilder {
   String writeConstructor() {
     final StringBuffer buffer = new StringBuffer();
 
-    buffer.writeln('${className}(this.source) {');
+    buffer.writeln('$className(this.source) {');
 
     final String args = utils.getAlphabetizedProperties(element)
         .map(utils.getPropertyData)

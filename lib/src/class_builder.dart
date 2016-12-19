@@ -43,9 +43,7 @@ class ClassBuilder {
     final String extendsPart = extendsList.join(', ');
     final String implementsPart = implementsList.join(', ');
 
-    buffer.writeln('/**');
-    buffer.writeln(' * $comment');
-    buffer.writeln(' */');
+    buffer.writeln('/// $comment');
 
     if (isAbstract) buffer.write('abstract ');
 
@@ -62,7 +60,11 @@ class ClassBuilder {
 
   String writeClassProperties() => '';
 
-  String writeProperty(PropertyAccessorElement property) => 'final ${property.returnType.displayName} ${property.displayName};';
+  String writeProperty(PropertyAccessorElement property) {
+    if (extendsList.isEmpty && implementsList.isEmpty) return 'final ${property.returnType.displayName} ${property.displayName};';
+
+    return '@override final ${property.returnType.displayName} ${property.displayName};';
+  }
 
   String writeConstructor() {
     final StringBuffer buffer = new StringBuffer();
@@ -71,7 +73,7 @@ class ClassBuilder {
         .map((String propertyName) => 'this.$propertyName')
         .join(', ');
 
-    buffer.writeln('${className}($args);');
+    buffer.writeln('$className($args);');
 
     return buffer.toString();
   }

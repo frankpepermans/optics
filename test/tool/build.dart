@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:build_runner/build_runner.dart';
 
 import 'phases.dart';
 
 bool test = true;
 
-main() async {
+Future<dynamic> main() async {
   await build(phases, deleteFilesByDefault: true);
 }
