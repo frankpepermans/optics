@@ -1,5 +1,7 @@
 library domain.person;
 
+import 'dart:collection';
+
 import 'package:optics/src/metadata.dart';
 
 part 'person.g.dart';

@@ -7,167 +7,133 @@ part of domain.person;
 // Target: abstract class Person
 // **************************************************************************
 
-typedef void PersonMutationHandler(PersonMutable template);
-Map<String, dynamic> _mappifyPerson(Person value) {
-  if (value == null) return null;
-  return <String, dynamic>{
-    'id': value.id,
-    'firstName': value.firstName,
-    'lastName': value.lastName,
-    'address': _mappifyAddress(value.address),
-    'pastAddresses': value.pastAddresses
-  };
+/**
+ * The immutable implementation of [Person]
+ */
+class PersonImm implements Person {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final Address address;
+  final Iterable<Address> pastAddresses;
+  PersonImm(
+      this.address, this.firstName, this.id, this.lastName, this.pastAddresses);
+
+  factory PersonImm.fromMap(Map<String, dynamic> source) => new PersonImm(
+      source['address'] != null
+          ? new AddressImm.fromMap(source['address'] is _AddressTemplate
+              ? source['address']._mappify()
+              : source['address'] is AddressImm
+                  ? source['address'].toJson()
+                  : source['address'])
+          : null,
+      source['firstName'],
+      source['id'],
+      source['lastName'],
+      source['pastAddresses'] != null
+          ? new UnmodifiableListView<Address>(
+              source['pastAddresses'].toList(growable: false))
+          : null);
+
+  factory PersonImm.fromLens(void predicate(_PersonTemplate template)) {
+    final _PersonTemplate template = new _PersonTemplate(null);
+    predicate(template);
+    return new PersonImm.fromMap(template._mutations);
+  }
+
+  PersonImm lens(void predicate(_PersonTemplate template)) {
+    final _PersonTemplate template = new _PersonTemplate(this);
+    predicate(template);
+    return new PersonImm.fromMap(template._mutations);
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'address': this.address,
+        'firstName': this.firstName,
+        'id': this.id,
+        'lastName': this.lastName,
+        'pastAddresses': this.pastAddresses
+      };
 }
 
-class PersonImpl implements Person {
-  final Map<String, dynamic> source;
-  String get id => source != null ? source['id'] : null;
-  String get firstName => source != null ? source['firstName'] : null;
-  String get lastName => source != null ? source['lastName'] : null;
-  Address get address {
-    if (source != null && source.containsKey('address'))
-      return new AddressImpl(source['address']);
-    return null;
-  }
-
-  Iterable<Address> get pastAddresses =>
-      source != null ? source['pastAddresses'] : null;
-  PersonImpl(this.source);
-  PersonImpl lens(PersonMutationHandler mutationHandler) =>
-      new _PersonLens(this, mutationHandler);
-  Map<String, dynamic> toJson() => _mappifyPerson(this);
-}
-
-class _PersonLens extends PersonImpl {
-  final Person root;
-  _PersonMutator mutator;
-  String get id {
-    if (mutator._containsKey('id')) return mutator.id;
-    return root.id;
-  }
-
-  String get firstName {
-    if (mutator._containsKey('firstName')) return mutator.firstName;
-    return root.firstName;
-  }
-
-  String get lastName {
-    if (mutator._containsKey('lastName')) return mutator.lastName;
-    return root.lastName;
-  }
-
-  Address get address => new _AddressResolver(mutator.address, root.address);
-  Iterable<Address> get pastAddresses {
-    if (mutator._containsKey('pastAddresses')) return mutator.pastAddresses;
-    return root.pastAddresses;
-  }
-
-  _PersonLens(Person root, PersonMutationHandler mutationHandler)
-      : this.root = root,
-        super(null) {
-    mutator = new _PersonMutator();
-    mutationHandler(mutator);
-    mutator.closed = true;
-  }
-}
-
-class _PersonResolver implements Person {
-  final Person primary, secondary;
-  String get id {
-    if (primary is _PersonMutator) {
-      if ((primary as _PersonMutator)._containsKey('id')) return primary.id;
-      return secondary?.id;
-    }
-    return (primary != null) ? primary.id : secondary?.id;
-  }
-
-  String get firstName {
-    if (primary is _PersonMutator) {
-      if ((primary as _PersonMutator)._containsKey('firstName'))
-        return primary.firstName;
-      return secondary?.firstName;
-    }
-    return (primary != null) ? primary.firstName : secondary?.firstName;
-  }
-
-  String get lastName {
-    if (primary is _PersonMutator) {
-      if ((primary as _PersonMutator)._containsKey('lastName'))
-        return primary.lastName;
-      return secondary?.lastName;
-    }
-    return (primary != null) ? primary.lastName : secondary?.lastName;
-  }
-
-  Address get address {
-    if (primary is _PersonMutator) {
-      if ((primary as _PersonMutator)._containsKey('address'))
-        return new _AddressResolver(primary.address, secondary?.address);
-      return secondary?.address;
-    }
-    return (primary != null) ? primary.address : secondary?.address;
-  }
-
-  Iterable<Address> get pastAddresses {
-    if (primary is _PersonMutator) {
-      if ((primary as _PersonMutator)._containsKey('pastAddresses'))
-        return primary.pastAddresses;
-      return secondary?.pastAddresses;
-    }
-    return (primary != null) ? primary.pastAddresses : secondary?.pastAddresses;
-  }
-
-  _PersonResolver(this.primary, this.secondary);
-}
-
-abstract class PersonMutable implements Person {
+/**
+ * The mutable interface for [Person]
+ */
+abstract class PersonMut extends Person {
+  String get id;
   set id(String value);
+
+  String get firstName;
   set firstName(String value);
+
+  String get lastName;
   set lastName(String value);
-  AddressMutable get address;
+
+  AddressMut get address;
   set address(Address value);
+
+  List<Address> get pastAddresses;
   set pastAddresses(Iterable<Address> value);
 }
 
-class _PersonMutator implements PersonMutable {
-  final dynamic parent;
-  final Map<String, dynamic> mutations = <String, dynamic>{};
-  bool closed = false;
-  String get id => mutations['id'];
-  set id(String value) => mutations['id'] = value;
-  String get firstName => mutations['firstName'];
-  set firstName(String value) => mutations['firstName'] = value;
-  String get lastName => mutations['lastName'];
-  set lastName(String value) => mutations['lastName'] = value;
-  AddressMutable get address {
-    if (mutations.containsKey('address')) return mutations['address'];
-    dynamic P = this;
-    while (P.parent != null) P = P.parent;
-    if (P.closed) return mutations['address'];
-    final _AddressMutator mutator = new _AddressMutator(parent: this);
-    mutations['address'] = mutator;
-    return mutator;
+/**
+ * The template implementation of [PersonMut]
+ */
+class _PersonTemplate implements PersonMut {
+  final Person source;
+  final Map<String, dynamic> _mutations = <String, dynamic>{};
+
+  String get id => _mutations['id'];
+  set id(String value) {
+    _mutations['id'] = value;
   }
 
-  set address(Address value) =>
-      mutations['address'] = new _AddressMutator.fromImmutable(value);
-  Iterable<Address> get pastAddresses => mutations['pastAddresses'];
-  set pastAddresses(Iterable<Address> value) =>
-      mutations['pastAddresses'] = value;
-  _PersonMutator({this.parent: null});
-  factory _PersonMutator.fromImmutable(Person value) {
-    if (value == null) return null;
-    if (value is _PersonMutator) return value;
-    return new _PersonMutator()
-      ..id = value.id
-      ..firstName = value.firstName
-      ..lastName = value.lastName
-      ..address = (value.address == null)
-          ? null
-          : new _AddressMutator.fromImmutable(value.address)
-      ..pastAddresses = value.pastAddresses;
+  String get firstName => _mutations['firstName'];
+  set firstName(String value) {
+    _mutations['firstName'] = value;
   }
-  bool _containsKey(String key) => mutations.containsKey(key);
+
+  String get lastName => _mutations['lastName'];
+  set lastName(String value) {
+    _mutations['lastName'] = value;
+  }
+
+  AddressMut get address {
+    if (_mutations['address'] == null)
+      _mutations['address'] = new _AddressTemplate(null);
+    return _mutations['address'];
+  }
+
+  set address(Address value) {
+    _mutations['address'] = value;
+  }
+
+  List<Address> get pastAddresses {
+    if (_mutations['pastAddresses'] == null)
+      _mutations['pastAddresses'] = new List<Address>();
+    return _mutations['pastAddresses'];
+  }
+
+  set pastAddresses(Iterable<Address> value) {
+    _mutations['pastAddresses'] = value;
+  }
+
+  _PersonTemplate(this.source) {
+    _mutations['address'] =
+        source?.address != null ? new _AddressTemplate(source?.address) : null;
+    _mutations['firstName'] = source?.firstName;
+    _mutations['id'] = source?.id;
+    _mutations['lastName'] = source?.lastName;
+    _mutations['pastAddresses'] = source?.pastAddresses;
+  }
+
+  Map<String, dynamic> _mappify() => <String, dynamic>{
+        'address': _mutations['address'],
+        'firstName': _mutations['firstName'],
+        'id': _mutations['id'],
+        'lastName': _mutations['lastName'],
+        'pastAddresses': _mutations['pastAddresses']
+      };
 }
 
 // **************************************************************************
@@ -175,164 +141,122 @@ class _PersonMutator implements PersonMutable {
 // Target: abstract class Address
 // **************************************************************************
 
-typedef void AddressMutationHandler(AddressMutable template);
-Map<String, dynamic> _mappifyAddress(Address value) {
-  if (value == null) return null;
-  return <String, dynamic>{
-    'street': value.street,
-    'number': value.number,
-    'town': value.town,
-    'country': value.country,
-    'landLord': _mappifyPerson(value.landLord)
-  };
+/**
+ * The immutable implementation of [Address]
+ */
+class AddressImm implements Address {
+  final String street;
+  final String number;
+  final String town;
+  final String country;
+  final Person landLord;
+  AddressImm(this.country, this.landLord, this.number, this.street, this.town);
+
+  factory AddressImm.fromMap(Map<String, dynamic> source) => new AddressImm(
+      source['country'],
+      source['landLord'] != null
+          ? new PersonImm.fromMap(source['landLord'] is _PersonTemplate
+              ? source['landLord']._mappify()
+              : source['landLord'] is PersonImm
+                  ? source['landLord'].toJson()
+                  : source['landLord'])
+          : null,
+      source['number'],
+      source['street'],
+      source['town']);
+
+  factory AddressImm.fromLens(void predicate(_AddressTemplate template)) {
+    final _AddressTemplate template = new _AddressTemplate(null);
+    predicate(template);
+    return new AddressImm.fromMap(template._mutations);
+  }
+
+  AddressImm lens(void predicate(_AddressTemplate template)) {
+    final _AddressTemplate template = new _AddressTemplate(this);
+    predicate(template);
+    return new AddressImm.fromMap(template._mutations);
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'country': this.country,
+        'landLord': this.landLord,
+        'number': this.number,
+        'street': this.street,
+        'town': this.town
+      };
 }
 
-class AddressImpl implements Address {
-  final Map<String, dynamic> source;
-  String get street => source != null ? source['street'] : null;
-  String get number => source != null ? source['number'] : null;
-  String get town => source != null ? source['town'] : null;
-  String get country => source != null ? source['country'] : null;
-  Person get landLord {
-    if (source != null && source.containsKey('landLord'))
-      return new PersonImpl(source['landLord']);
-    return null;
-  }
-
-  AddressImpl(this.source);
-  AddressImpl lens(AddressMutationHandler mutationHandler) =>
-      new _AddressLens(this, mutationHandler);
-  Map<String, dynamic> toJson() => _mappifyAddress(this);
-}
-
-class _AddressLens extends AddressImpl {
-  final Address root;
-  _AddressMutator mutator;
-  String get street {
-    if (mutator._containsKey('street')) return mutator.street;
-    return root.street;
-  }
-
-  String get number {
-    if (mutator._containsKey('number')) return mutator.number;
-    return root.number;
-  }
-
-  String get town {
-    if (mutator._containsKey('town')) return mutator.town;
-    return root.town;
-  }
-
-  String get country {
-    if (mutator._containsKey('country')) return mutator.country;
-    return root.country;
-  }
-
-  Person get landLord => new _PersonResolver(mutator.landLord, root.landLord);
-  _AddressLens(Address root, AddressMutationHandler mutationHandler)
-      : this.root = root,
-        super(null) {
-    mutator = new _AddressMutator();
-    mutationHandler(mutator);
-    mutator.closed = true;
-  }
-}
-
-class _AddressResolver implements Address {
-  final Address primary, secondary;
-  String get street {
-    if (primary is _AddressMutator) {
-      if ((primary as _AddressMutator)._containsKey('street'))
-        return primary.street;
-      return secondary?.street;
-    }
-    return (primary != null) ? primary.street : secondary?.street;
-  }
-
-  String get number {
-    if (primary is _AddressMutator) {
-      if ((primary as _AddressMutator)._containsKey('number'))
-        return primary.number;
-      return secondary?.number;
-    }
-    return (primary != null) ? primary.number : secondary?.number;
-  }
-
-  String get town {
-    if (primary is _AddressMutator) {
-      if ((primary as _AddressMutator)._containsKey('town'))
-        return primary.town;
-      return secondary?.town;
-    }
-    return (primary != null) ? primary.town : secondary?.town;
-  }
-
-  String get country {
-    if (primary is _AddressMutator) {
-      if ((primary as _AddressMutator)._containsKey('country'))
-        return primary.country;
-      return secondary?.country;
-    }
-    return (primary != null) ? primary.country : secondary?.country;
-  }
-
-  Person get landLord {
-    if (primary is _AddressMutator) {
-      if ((primary as _AddressMutator)._containsKey('landLord'))
-        return new _PersonResolver(primary.landLord, secondary?.landLord);
-      return secondary?.landLord;
-    }
-    return (primary != null) ? primary.landLord : secondary?.landLord;
-  }
-
-  _AddressResolver(this.primary, this.secondary);
-}
-
-abstract class AddressMutable implements Address {
+/**
+ * The mutable interface for [Address]
+ */
+abstract class AddressMut extends Address {
+  String get street;
   set street(String value);
+
+  String get number;
   set number(String value);
+
+  String get town;
   set town(String value);
+
+  String get country;
   set country(String value);
-  PersonMutable get landLord;
+
+  PersonMut get landLord;
   set landLord(Person value);
 }
 
-class _AddressMutator implements AddressMutable {
-  final dynamic parent;
-  final Map<String, dynamic> mutations = <String, dynamic>{};
-  bool closed = false;
-  String get street => mutations['street'];
-  set street(String value) => mutations['street'] = value;
-  String get number => mutations['number'];
-  set number(String value) => mutations['number'] = value;
-  String get town => mutations['town'];
-  set town(String value) => mutations['town'] = value;
-  String get country => mutations['country'];
-  set country(String value) => mutations['country'] = value;
-  PersonMutable get landLord {
-    if (mutations.containsKey('landLord')) return mutations['landLord'];
-    dynamic P = this;
-    while (P.parent != null) P = P.parent;
-    if (P.closed) return mutations['landLord'];
-    final _PersonMutator mutator = new _PersonMutator(parent: this);
-    mutations['landLord'] = mutator;
-    return mutator;
+/**
+ * The template implementation of [AddressMut]
+ */
+class _AddressTemplate implements AddressMut {
+  final Address source;
+  final Map<String, dynamic> _mutations = <String, dynamic>{};
+
+  String get street => _mutations['street'];
+  set street(String value) {
+    _mutations['street'] = value;
   }
 
-  set landLord(Person value) =>
-      mutations['landLord'] = new _PersonMutator.fromImmutable(value);
-  _AddressMutator({this.parent: null});
-  factory _AddressMutator.fromImmutable(Address value) {
-    if (value == null) return null;
-    if (value is _AddressMutator) return value;
-    return new _AddressMutator()
-      ..street = value.street
-      ..number = value.number
-      ..town = value.town
-      ..country = value.country
-      ..landLord = (value.landLord == null)
-          ? null
-          : new _PersonMutator.fromImmutable(value.landLord);
+  String get number => _mutations['number'];
+  set number(String value) {
+    _mutations['number'] = value;
   }
-  bool _containsKey(String key) => mutations.containsKey(key);
+
+  String get town => _mutations['town'];
+  set town(String value) {
+    _mutations['town'] = value;
+  }
+
+  String get country => _mutations['country'];
+  set country(String value) {
+    _mutations['country'] = value;
+  }
+
+  PersonMut get landLord {
+    if (_mutations['landLord'] == null)
+      _mutations['landLord'] = new _PersonTemplate(null);
+    return _mutations['landLord'];
+  }
+
+  set landLord(Person value) {
+    _mutations['landLord'] = value;
+  }
+
+  _AddressTemplate(this.source) {
+    _mutations['country'] = source?.country;
+    _mutations['landLord'] =
+        source?.landLord != null ? new _PersonTemplate(source?.landLord) : null;
+    _mutations['number'] = source?.number;
+    _mutations['street'] = source?.street;
+    _mutations['town'] = source?.town;
+  }
+
+  Map<String, dynamic> _mappify() => <String, dynamic>{
+        'country': _mutations['country'],
+        'landLord': _mutations['landLord'],
+        'number': _mutations['number'],
+        'street': _mutations['street'],
+        'town': _mutations['town']
+      };
 }

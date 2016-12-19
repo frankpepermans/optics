@@ -34,7 +34,7 @@ main(List<String> args) {
  * just deserializing from JSON to immutable Person / PersonImpl
  */
 void _unmodified() {
-  final Person subject = new PersonImpl(JSON.decode(dataRaw));
+  final Person subject = new PersonImm.fromMap(JSON.decode(dataRaw));
 
   _prettyPrint(subject);
 
@@ -73,7 +73,7 @@ void _unmodified() {
  * If the template didn't set a certain property => use the value found in the old immutable object
  */
 void _modifyStepped() {
-  PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
+  PersonImm subject = new PersonImm.fromMap(JSON.decode(dataRaw));
 
   subject = subject
       .lens((template) => template.firstName = 'Billie')
@@ -109,7 +109,7 @@ void _modifyStepped() {
  * The result is identical to the above example
  */
 void _modifyBatched() {
-  PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
+  PersonImm subject = new PersonImm.fromMap(JSON.decode(dataRaw));
 
   subject = subject
       .lens((template) {
@@ -117,6 +117,14 @@ void _modifyBatched() {
         template.lastName = 'The Kid';
         template.address.street = 'Race';
         template.address.number = '23';
+
+        template.pastAddresses.add(new AddressImm.fromLens((template) {
+          template.street = 'Over there';
+        }));
+
+        template.pastAddresses = <Address>[new AddressImm.fromLens((template) {
+          template.street = 'Over there';
+        })];
       });
 
   _prettyPrint(subject);
@@ -145,7 +153,7 @@ void _modifyBatched() {
  * Example to showcase how you can set a deeply nested property, even if this path would be null at some point in the original object
  */
 void _modifyDeepNested() {
-  PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
+  PersonImm subject = new PersonImm.fromMap(JSON.decode(dataRaw));
 
   subject = subject
       .lens((template) => template.address.landLord.address.landLord.address.landLord.address.street = 'far far away');
@@ -202,7 +210,7 @@ void _modifyDeepNested() {
  * In this case a self-reference is created
  */
 void _reference() {
-  PersonImpl subject = new PersonImpl(JSON.decode(dataRaw));
+  PersonImm subject = new PersonImm.fromMap(JSON.decode(dataRaw));
 
   subject = subject
       .lens((template) => template.address.landLord = subject);
@@ -235,4 +243,4 @@ void _reference() {
 }
 
 // pretty JSON printer
-void _prettyPrint(PersonImpl subject) => print(new JsonEncoder.withIndent('    ').convert(subject));
+void _prettyPrint(PersonImm subject) => print(new JsonEncoder.withIndent('    ').convert(subject));
