@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/frankpepermans/optics.svg)](https://travis-ci.org/frankpepermans/optics)
-[![Coverage Status](https://coveralls.io/repos/frankpepermans/optics/badge.svg?branch=master&service=github)](https://coveralls.io/github/frankpepermans/optics?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/frankpepermans/optics/badge.svg?branch=master)](https://coveralls.io/github/frankpepermans/optics?branch=master)
 
 # optics
 Is a POC/playground library to facilitate working with immutable data in Dart.
