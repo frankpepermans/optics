@@ -32,6 +32,7 @@ abstract class PropertyData {
   String get asImmutableDisplayName;
   String get asMutableDisplayName;
   String get asInterfaceDisplayName;
+  String get genericType;
 
 }
 
@@ -41,6 +42,7 @@ class DefaultPropertyData implements PropertyData {
   final String asImmutableDisplayName;
   final String asMutableDisplayName;
   final String asInterfaceDisplayName;
+  final String genericType = null;
 
   DefaultPropertyData(PropertyAccessorElement property) :
         this.property = property,
@@ -56,6 +58,7 @@ class CustomObjectData implements PropertyData {
   final String asImmutableDisplayName;
   final String asMutableDisplayName;
   final String asInterfaceDisplayName;
+  final String genericType = null;
 
   CustomObjectData(PropertyAccessorElement property) :
         this.property = property,
@@ -70,10 +73,12 @@ class ListData implements PropertyData {
   final String asImmutableDisplayName;
   final String asMutableDisplayName;
   final String asInterfaceDisplayName;
+  final String genericType;
 
   ListData(PropertyAccessorElement property) :
         this.property = property,
         this.asImmutableDisplayName = ((property.returnType.displayName.compareTo(property.returnType.name) == 0) ? 'UnmodifiableListView' : 'UnmodifiableListView${property.returnType.displayName.substring(property.returnType.name.length)}'),
         this.asMutableDisplayName = ((property.returnType.displayName.compareTo(property.returnType.name) == 0) ? 'List' : 'List${property.returnType.displayName.substring(property.returnType.name.length)}'),
-        this.asInterfaceDisplayName = ((property.returnType.displayName.compareTo(property.returnType.name) == 0) ? 'Iterable' : 'Iterable${property.returnType.displayName.substring(property.returnType.name.length)}');
+        this.asInterfaceDisplayName = ((property.returnType.displayName.compareTo(property.returnType.name) == 0) ? 'Iterable' : 'Iterable${property.returnType.displayName.substring(property.returnType.name.length)}'),
+        this.genericType = ((property.returnType.displayName.compareTo(property.returnType.name) == 0) ? 'dynamic' : property.returnType.displayName.substring(property.returnType.name.length + 1, property.returnType.displayName.length - 1));
 }

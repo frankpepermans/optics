@@ -1,1 +1,7 @@
-export 'package:optics/src/domain/person.dart';
+class Optics {
+
+  const Optics();
+
+}
+
+const Object optics = const Optics();
