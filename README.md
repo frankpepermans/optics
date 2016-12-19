@@ -117,6 +117,8 @@ void main() {
           ));
       
           /// ...and mutate him right away
+          /// note: even though an EmployeeImm was used to add this employee,
+          /// because we run in template mode, we always get a mutable Employee object instead
           EmployeeMut employee = template.employees.first;
       
           employee.address.country += ' Kingdom';
