@@ -53,7 +53,7 @@ class ImmutableImplementation extends ClassBuilder {
         .map(utils.getPropertyData)
         .map((utils.PropertyData propertyData) {
           if (propertyData is utils.CustomObjectData) return '''source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}.fromMap(source['${propertyData.property.displayName}'] is _${propertyData.asInterfaceDisplayName}Template ? source['${propertyData.property.displayName}']._mappify() : source['${propertyData.property.displayName}'] is ${propertyData.asInterfaceDisplayName}Imm ? source['${propertyData.property.displayName}'].toJson() : source['${propertyData.property.displayName}']) : null''';
-          else if (propertyData is utils.ListData) return '''source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}(source['${propertyData.property.displayName}'].toList(growable: false)) : null''';
+          else if (propertyData is utils.ListData) return '''source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}(source['${propertyData.property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template ? new ${propertyData.genericType}Imm.fromMap(entry._mutations) : entry)) : null''';
           return '''source['${propertyData.property.displayName}']''';
         })
         .join(', ');

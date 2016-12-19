@@ -91,14 +91,36 @@ void main() {
   
   /// now let's mutate it
   company = company
-      .lens((template) {
-        /// template is typed and implements [CompanyMut], which is a generated getter/setter company interface
-        /// we cannot create a new Company template ourselves, it only exists within the lens function
-        template.address.street = 'Main Street';
-        template.address.city = 'Looney Tunes Town';
-        /// template.address is null in the immutable
-        /// but for convenience, the template auto-creates an address template when accessing the address getter
-      });
+        .lens((template) {
+          ///
+          /// template is typed and implements [CompanyMut], which is a generated getter/setter company interface
+          /// we cannot create a new Company template ourselves, it only exists within the lens function
+          ///
+          /// template.address is null in the immutable
+          /// but for convenience, the template auto-creates an address template when accessing the address getter
+          ///
+          template.address.street = 'Main Street';
+          template.address.town = 'Looney Tunes Town';
+      
+          /// We can also add an employee
+          template.employees.add(new EmployeeImm(
+            new AddressImm(
+              'United',
+              '17',
+              'Mount Ephraim Road',
+              'Rockport'
+            ),
+            'John',
+            123,
+            'Doe',
+            null
+          ));
+      
+          /// ...and mutate him right away
+          EmployeeMut employee = template.employees.first;
+      
+          employee.address.country += ' Kingdom';
+        });
   
   /// company is now a mutated Company immutable, let's print it out:
   print(new JsonEncoder.withIndent('    ', (data) {
@@ -109,18 +131,58 @@ void main() {
   
   /// prints:
   /// --------------------------------------
-  /// {
-  ///     "address": {
-  ///         "country": null,
-  ///         "number": null,
-  ///         "street": "Main Street",
-  ///         "town": "Looney Tunes Town"
-  ///     },
-  ///     "employees": null,
-  ///     "founded": 1480546800000,
-  ///     "name": "ACME corp"
-  /// }
+  /** {
+          "address": {
+              "country": null,
+              "number": null,
+              "street": "Main Street",
+              "town": "Looney Tunes Town"
+          },
+          "employees": [
+              {
+                  "address": {
+                      "country": "United Kingdom",
+                      "number": "17",
+                      "street": "Mount Ephraim Road",
+                      "town": "Rockport"
+                  },
+                  "firstName": "John",
+                  "id": 123,
+                  "lastName": "Doe",
+                  "reportsTo": null
+              }
+          ],
+          "founded": 1480546800000,
+          "name": "ACME corp"
+      }
+  */
   /// --------------------------------------
+  
+  /// Let's just check the type after the lens operation:
+  print(company.employees.first.runtimeType); /// => EmployeeImm
+  
+  /// Looking good! An immutable class where all properties are final!
+  /// See the class below
+}
+```
+
+```dart
+class EmployeeImm implements Employee {
+   
+  final int id;
+   
+  final String firstName;
+   
+  final String lastName;
+   
+  final Address address;
+   
+  final Employee reportsTo;
+   
+  EmployeeImm(
+      this.address, this.firstName, this.id, this.lastName, this.reportsTo);
+
+  ...
 }
 ```
 

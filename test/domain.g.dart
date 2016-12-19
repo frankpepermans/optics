@@ -28,8 +28,10 @@ class CompanyImm implements Company {
                   : source['address'])
           : null,
       source['employees'] != null
-          ? new UnmodifiableListView<Employee>(
-              source['employees'].toList(growable: false))
+          ? new UnmodifiableListView<Employee>(source['employees'].map(
+              (Employee entry) => entry is _EmployeeTemplate
+                  ? new EmployeeImm.fromMap(entry._mutations)
+                  : entry))
           : null,
       source['founded'],
       source['name']);
