@@ -11,6 +11,6 @@ void main() {
       if (data is DateTime) return data.millisecondsSinceEpoch;
 
       return data.toJson();
-    }), '{"address":null,"employees":[{"address":{"country":"USA","number":"742","street":"Evergreen Terrace","town":"Springfield"},"firstName":"Homer","id":999,"lastName":"Simpson","reportsTo":{"address":null,"firstName":"Waylon","id":2,"lastName":"Smithers","reportsTo":{"address":null,"firstName":"Montgomery","id":1,"lastName":"Burns","reportsTo":null}}},{"address":null,"firstName":"Waylon","id":2,"lastName":"Smithers","reportsTo":{"address":null,"firstName":"Montgomery","id":1,"lastName":"Burns","reportsTo":null}},{"address":null,"firstName":"Montgomery","id":1,"lastName":"Burns","reportsTo":null}],"founded":-623376000000,"name":"Springfield nuclear power plant"}');
+    }), '{"address":null,"employees":[{"firstName":"Homer","lastName":"Simpson","address":{"country":"USA","number":"742","street":"Evergreen Terrace","town":"Springfield"},"id":999,"reportsTo":{"firstName":"Waylon","lastName":"Smithers","address":null,"id":2,"reportsTo":{"firstName":"Montgomery","lastName":"Burns","address":null,"id":1,"reportsTo":null}}},{"firstName":"Waylon","lastName":"Smithers","address":null,"id":2,"reportsTo":{"firstName":"Montgomery","lastName":"Burns","address":null,"id":1,"reportsTo":null}},{"firstName":"Montgomery","lastName":"Burns","address":null,"id":1,"reportsTo":null}],"founded":-623376000000,"name":"Springfield nuclear power plant"}');
   });
 }

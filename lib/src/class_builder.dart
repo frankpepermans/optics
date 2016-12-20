@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'package:optics/src/element_utils.dart' as utils;
 
@@ -11,10 +12,12 @@ class ClassBuilder {
   final bool isPrivate;
   final List<String> implementsList, extendsList;
   final String comment;
+  final bool isSubClass;
 
   ClassBuilder(ClassElement element, {this.suffix, this.isAbstract, this.isPrivate, this.implementsList: const [], this.extendsList: const [], this.comment}) :
         this.element = element,
-        className = '${isPrivate ? '_' : ''}${element.displayName}$suffix';
+        className = '${isPrivate ? '_' : ''}${element.displayName}$suffix',
+        isSubClass = element.allSupertypes.length > 1;
 
   String write() {
     final StringBuffer buffer = new StringBuffer();
@@ -38,20 +41,26 @@ class ClassBuilder {
     return buffer.toString();
   }
 
-  String writeDeclaration() {
+  String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
     final StringBuffer buffer = new StringBuffer();
-    final String extendsPart = extendsList.join(', ');
-    final String implementsPart = implementsList.join(', ');
+    final List<String> allExtends = new List<String>()..addAll(extendsList)..addAll(customExtendsList);
+    final List<String> allImplements = new List<String>()..addAll(implementsList)..addAll(customImplementsList);
+    final List<String> allMixins = new List<String>()..addAll(customMixinsList)..addAll(extendsList.length > 1 ? extendsList.sublist(1) : const []);
+    final String extendsPart = allExtends.isNotEmpty ? allExtends.first : '';
+    final String implementsPart = allImplements.join(', ');
 
     buffer.writeln('/// $comment');
 
     if (isAbstract) buffer.write('abstract ');
 
-    buffer.write('class $className ');
+    if (genericTypes.isEmpty) buffer.write('class $className ');
+    else buffer.write('class $className<${genericTypes.join(', ')}> ');
 
-    if (extendsPart.isNotEmpty) buffer.write('extends $extendsPart');
+    if (extendsPart.isNotEmpty) buffer.write(' extends $extendsPart');
 
-    if (implementsPart.isNotEmpty) buffer.write('implements $implementsPart');
+    if (implementsPart.isNotEmpty) buffer.write(' implements $implementsPart');
+
+    if (allMixins.isNotEmpty) buffer.write(' with ${allMixins.join(', ')}');
 
     buffer.write('{');
 
@@ -73,7 +82,7 @@ class ClassBuilder {
         .map((String propertyName) => 'this.$propertyName')
         .join(', ');
 
-    buffer.writeln('$className($args);');
+    buffer.writeln('$className({$args});');
 
     return buffer.toString();
   }

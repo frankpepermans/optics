@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'package:optics/src/class_builder.dart';
 
@@ -10,10 +11,40 @@ class ImmutableImplementation extends ClassBuilder {
     super(element, suffix: 'Imm', isAbstract: false, isPrivate: false, implementsList: <String>[element.displayName], comment: 'The immutable implementation of [${element.displayName}]');
 
   @override
+  String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
+    return super.writeDeclaration(customExtendsList: element.allSupertypes
+      .map((InterfaceType type) => type.displayName)
+      .where((String type) => type.compareTo('Object') != 0)
+      .map((String type) => '${type}Imm'));
+  }
+
+  @override
   String writeConstructor() {
     final StringBuffer buffer = new StringBuffer();
+    final List<String> superProperties = <String>[];
+    final List<String> allProperties = <String>[];
 
-    buffer.writeln(super.writeConstructor());
+    if (isSubClass) {
+      element.allSupertypes
+          .where((InterfaceType type) => type.displayName.compareTo('Object') != 0)
+          .forEach((InterfaceType type) => superProperties.addAll(utils.getAlphabetizedProperties(type.element)
+            .map((PropertyAccessorElement property) => '${property.returnType.displayName} ${property.displayName}')));
+    }
+
+    allProperties.addAll(utils.getAlphabetizedProperties(element)
+        .map((PropertyAccessorElement property) => property.displayName)
+        .map((String propertyName) => 'this.$propertyName'));
+
+    allProperties.addAll(superProperties);
+
+    if (isSubClass) {
+      final String superArgs = superProperties
+        .map((String value) => value.split(' ').last)
+        .map((String value) => '$value:$value')
+        .join(', ');
+
+      buffer.writeln('$className({${allProperties.join(', ')}}) : super($superArgs);');
+    } else buffer.writeln('$className({${allProperties.join(', ')}});');
 
     buffer.writeln();
 
@@ -35,26 +66,30 @@ class ImmutableImplementation extends ClassBuilder {
       .map((String propertyName) => ''' '$propertyName':this.$propertyName ''')
       .join(', ');
 
-    buffer.writeln('$className lens(void predicate(_${element.displayName}Template template)) {');
-    buffer.writeln('final _${element.displayName}Template template = new _${element.displayName}Template(this);');
+    if (isSubClass) buffer.writeln('@override $className lens(void predicate(_${element.displayName}Template<${element.displayName}> template)) {');
+    else buffer.writeln('$className lens(void predicate(_${element.displayName}Template<${element.displayName}> template)) {');
+
+    buffer.writeln('final _${element.displayName}Template<${element.displayName}> template = new _${element.displayName}Template<${element.displayName}>(this);');
     buffer.writeln('predicate(template);');
     buffer.writeln('return new $className.fromMap(template._mutations);');
     buffer.writeln('}');
 
-    buffer.writeln('Map<String, dynamic> toJson() => <String, dynamic>{$properties};');
+    if (isSubClass) buffer.writeln('@override Map<String, dynamic> toJson() => super.toJson()..addAll(<String, dynamic>{$properties});');
+    else buffer.writeln('Map<String, dynamic> toJson() => <String, dynamic>{$properties};');
 
     return buffer.toString();
   }
 
   String writeFromMapFactoryConstructor() {
     final StringBuffer buffer = new StringBuffer();
-    final List<PropertyAccessorElement> properties = utils.getAlphabetizedProperties(element);
+    final List<PropertyAccessorElement> properties = utils.getRecursiveAlphabetizedProperties(element);
+
     final String args = properties
         .map(utils.getPropertyData)
         .map((utils.PropertyData propertyData) {
-          if (propertyData is utils.CustomObjectData) return '''source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}.fromMap(source['${propertyData.property.displayName}'] is _${propertyData.asInterfaceDisplayName}Template ? source['${propertyData.property.displayName}']._mappify() : source['${propertyData.property.displayName}'] is ${propertyData.asInterfaceDisplayName}Imm ? source['${propertyData.property.displayName}'].toJson() : source['${propertyData.property.displayName}']) : null''';
-          else if (propertyData is utils.ListData) return '''source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}(source['${propertyData.property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template ? new ${propertyData.genericType}Imm.fromMap(entry._mutations) : entry)) : null''';
-          return '''source['${propertyData.property.displayName}']''';
+          if (propertyData is utils.CustomObjectData) return '''${propertyData.property.displayName}:source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}.fromMap(source['${propertyData.property.displayName}'] is _${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}> ? source['${propertyData.property.displayName}']._mappify() : source['${propertyData.property.displayName}'] is ${propertyData.asInterfaceDisplayName}Imm ? source['${propertyData.property.displayName}'].toJson() : source['${propertyData.property.displayName}']) : null''';
+          else if (propertyData is utils.ListData) return '''${propertyData.property.displayName}:source['${propertyData.property.displayName}'] != null ? new ${propertyData.asImmutableDisplayName}(source['${propertyData.property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template<${propertyData.genericType}> ? new ${propertyData.genericType}Imm.fromMap(entry._mutations) : entry)) : null''';
+          return '''${propertyData.property.displayName}:source['${propertyData.property.displayName}']''';
         })
         .join(', ');
 
@@ -66,8 +101,8 @@ class ImmutableImplementation extends ClassBuilder {
   String writeFromLensFactoryConstructor() {
     final StringBuffer buffer = new StringBuffer();
 
-    buffer.writeln('factory $className.fromLens(void predicate(_${element.displayName}Template template)) {');
-    buffer.writeln('final _${element.displayName}Template template = new _${element.displayName}Template(null);');
+    buffer.writeln('factory $className.fromLens(void predicate(_${element.displayName}Template<${element.displayName}> template)) {');
+    buffer.writeln('final _${element.displayName}Template<${element.displayName}> template = new _${element.displayName}Template<${element.displayName}>(null);');
     buffer.writeln('predicate(template);');
     buffer.writeln('return new $className.fromMap(template._mutations);');
     buffer.writeln('}');

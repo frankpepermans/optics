@@ -17,33 +17,37 @@ class CompanyImm implements Company {
   final Address address;
   @override
   final Iterable<Employee> employees;
-  CompanyImm(this.address, this.employees, this.founded, this.name);
+  CompanyImm({this.address, this.employees, this.founded, this.name});
 
   factory CompanyImm.fromMap(Map<String, dynamic> source) => new CompanyImm(
-      source['address'] != null
-          ? new AddressImm.fromMap(source['address'] is _AddressTemplate
-              ? source['address']._mappify()
-              : source['address'] is AddressImm
-                  ? source['address'].toJson()
-                  : source['address'])
+      address: source['address'] != null
+          ? new AddressImm.fromMap(
+              source['address'] is _AddressTemplate<Address>
+                  ? source['address']._mappify()
+                  : source['address'] is AddressImm
+                      ? source['address'].toJson()
+                      : source['address'])
           : null,
-      source['employees'] != null
+      employees: source['employees'] != null
           ? new UnmodifiableListView<Employee>(source['employees'].map(
-              (Employee entry) => entry is _EmployeeTemplate
+              (Employee entry) => entry is _EmployeeTemplate<Employee>
                   ? new EmployeeImm.fromMap(entry._mutations)
                   : entry))
           : null,
-      source['founded'],
-      source['name']);
+      founded: source['founded'],
+      name: source['name']);
 
-  factory CompanyImm.fromLens(void predicate(_CompanyTemplate template)) {
-    final _CompanyTemplate template = new _CompanyTemplate(null);
+  factory CompanyImm.fromLens(
+      void predicate(_CompanyTemplate<Company> template)) {
+    final _CompanyTemplate<Company> template =
+        new _CompanyTemplate<Company>(null);
     predicate(template);
     return new CompanyImm.fromMap(template._mutations);
   }
 
-  CompanyImm lens(void predicate(_CompanyTemplate template)) {
-    final _CompanyTemplate template = new _CompanyTemplate(this);
+  CompanyImm lens(void predicate(_CompanyTemplate<Company> template)) {
+    final _CompanyTemplate<Company> template =
+        new _CompanyTemplate<Company>(this);
     predicate(template);
     return new CompanyImm.fromMap(template._mutations);
   }
@@ -76,8 +80,8 @@ abstract class CompanyMut extends Company {
 }
 
 /// The template implementation of [CompanyMut]
-class _CompanyTemplate implements CompanyMut {
-  final Company source;
+class _CompanyTemplate<T extends Company> implements CompanyMut {
+  final T source;
   final Map<String, dynamic> _mutations = <String, dynamic>{};
 
   @override
@@ -97,7 +101,7 @@ class _CompanyTemplate implements CompanyMut {
   @override
   AddressMut get address {
     if (_mutations['address'] == null)
-      _mutations['address'] = new _AddressTemplate(null);
+      _mutations['address'] = new _AddressTemplate<Address>(null);
     return _mutations['address'];
   }
 
@@ -110,12 +114,13 @@ class _CompanyTemplate implements CompanyMut {
   List<Employee> get employees {
     if (_mutations['employees'] == null) _mutations['employees'] = <Employee>[];
     if (_mutations['employees'].firstWhere(
-            (Employee entry) => entry is! _EmployeeTemplate,
+            (Employee entry) => entry is! _EmployeeTemplate<Employee>,
             orElse: () => null) !=
         null)
       _mutations['employees'] = _mutations['employees']
-          .map((Employee entry) =>
-              entry is _EmployeeTemplate ? entry : new _EmployeeTemplate(entry))
+          .map((Employee entry) => entry is _EmployeeTemplate<Employee>
+              ? entry
+              : new _EmployeeTemplate<Employee>(entry))
           .toList();
     return _mutations['employees'];
   }
@@ -126,11 +131,12 @@ class _CompanyTemplate implements CompanyMut {
   }
 
   _CompanyTemplate(this.source) {
-    _mutations['address'] =
-        source?.address != null ? new _AddressTemplate(source.address) : null;
+    _mutations['address'] = source?.address != null
+        ? new _AddressTemplate<Address>(source.address)
+        : null;
     _mutations['employees'] = source?.employees != null
         ? new List<Employee>.from(source.employees
-            .map((Employee entry) => new _EmployeeTemplate(entry)))
+            .map((Employee entry) => new _EmployeeTemplate<Employee>(entry)))
         : null;
     _mutations['founded'] = source?.founded;
     _mutations['name'] = source?.name;
@@ -146,70 +152,38 @@ class _CompanyTemplate implements CompanyMut {
 
 // **************************************************************************
 // Generator: OpticsGenerator
-// Target: abstract class Employee
+// Target: abstract class Person
 // **************************************************************************
 
-/// The immutable implementation of [Employee]
-class EmployeeImm implements Employee {
-  @override
-  final int id;
+/// The immutable implementation of [Person]
+class PersonImm implements Person {
   @override
   final String firstName;
   @override
   final String lastName;
-  @override
-  final Address address;
-  @override
-  final Employee reportsTo;
-  EmployeeImm(
-      this.address, this.firstName, this.id, this.lastName, this.reportsTo);
+  PersonImm({this.firstName, this.lastName});
 
-  factory EmployeeImm.fromMap(Map<String, dynamic> source) => new EmployeeImm(
-      source['address'] != null
-          ? new AddressImm.fromMap(source['address'] is _AddressTemplate
-              ? source['address']._mappify()
-              : source['address'] is AddressImm
-                  ? source['address'].toJson()
-                  : source['address'])
-          : null,
-      source['firstName'],
-      source['id'],
-      source['lastName'],
-      source['reportsTo'] != null
-          ? new EmployeeImm.fromMap(source['reportsTo'] is _EmployeeTemplate
-              ? source['reportsTo']._mappify()
-              : source['reportsTo'] is EmployeeImm
-                  ? source['reportsTo'].toJson()
-                  : source['reportsTo'])
-          : null);
+  factory PersonImm.fromMap(Map<String, dynamic> source) => new PersonImm(
+      firstName: source['firstName'], lastName: source['lastName']);
 
-  factory EmployeeImm.fromLens(void predicate(_EmployeeTemplate template)) {
-    final _EmployeeTemplate template = new _EmployeeTemplate(null);
+  factory PersonImm.fromLens(void predicate(_PersonTemplate<Person> template)) {
+    final _PersonTemplate<Person> template = new _PersonTemplate<Person>(null);
     predicate(template);
-    return new EmployeeImm.fromMap(template._mutations);
+    return new PersonImm.fromMap(template._mutations);
   }
 
-  EmployeeImm lens(void predicate(_EmployeeTemplate template)) {
-    final _EmployeeTemplate template = new _EmployeeTemplate(this);
+  PersonImm lens(void predicate(_PersonTemplate<Person> template)) {
+    final _PersonTemplate<Person> template = new _PersonTemplate<Person>(this);
     predicate(template);
-    return new EmployeeImm.fromMap(template._mutations);
+    return new PersonImm.fromMap(template._mutations);
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'address': this.address,
-        'firstName': this.firstName,
-        'id': this.id,
-        'lastName': this.lastName,
-        'reportsTo': this.reportsTo
-      };
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'firstName': this.firstName, 'lastName': this.lastName};
 }
 
-/// The mutable interface for [Employee]
-abstract class EmployeeMut extends Employee {
-  @override
-  int get id;
-  set id(int value);
-
+/// The mutable interface for [Person]
+abstract class PersonMut extends Person {
   @override
   String get firstName;
   set firstName(String value);
@@ -217,27 +191,12 @@ abstract class EmployeeMut extends Employee {
   @override
   String get lastName;
   set lastName(String value);
-
-  @override
-  AddressMut get address;
-  set address(Address value);
-
-  @override
-  EmployeeMut get reportsTo;
-  set reportsTo(Employee value);
 }
 
-/// The template implementation of [EmployeeMut]
-class _EmployeeTemplate implements EmployeeMut {
-  final Employee source;
+/// The template implementation of [PersonMut]
+class _PersonTemplate<T extends Person> implements PersonMut {
+  final T source;
   final Map<String, dynamic> _mutations = <String, dynamic>{};
-
-  @override
-  int get id => _mutations['id'];
-  @override
-  set id(int value) {
-    _mutations['id'] = value;
-  }
 
   @override
   String get firstName => _mutations['firstName'];
@@ -253,10 +212,78 @@ class _EmployeeTemplate implements EmployeeMut {
     _mutations['lastName'] = value;
   }
 
+  _PersonTemplate(this.source) {
+    _mutations['firstName'] = source?.firstName;
+    _mutations['lastName'] = source?.lastName;
+  }
+
+  Map<String, dynamic> _mappify() => <String, dynamic>{
+        'firstName': _mutations['firstName'],
+        'lastName': _mutations['lastName']
+      };
+}
+
+// **************************************************************************
+// Generator: OpticsGenerator
+// Target: abstract class PersonWithAddress
+// **************************************************************************
+
+/// The immutable implementation of [PersonWithAddress]
+class PersonWithAddressImm extends PersonImm implements PersonWithAddress {
+  @override
+  final Address address;
+  PersonWithAddressImm({this.address, String firstName, String lastName})
+      : super(firstName: firstName, lastName: lastName);
+
+  factory PersonWithAddressImm.fromMap(Map<String, dynamic> source) =>
+      new PersonWithAddressImm(
+          address: source['address'] != null
+              ? new AddressImm.fromMap(
+                  source['address'] is _AddressTemplate<Address>
+                      ? source['address']._mappify()
+                      : source['address'] is AddressImm
+                          ? source['address'].toJson()
+                          : source['address'])
+              : null,
+          firstName: source['firstName'],
+          lastName: source['lastName']);
+
+  factory PersonWithAddressImm.fromLens(
+      void predicate(_PersonWithAddressTemplate<PersonWithAddress> template)) {
+    final _PersonWithAddressTemplate<PersonWithAddress> template =
+        new _PersonWithAddressTemplate<PersonWithAddress>(null);
+    predicate(template);
+    return new PersonWithAddressImm.fromMap(template._mutations);
+  }
+
+  @override
+  PersonWithAddressImm lens(
+      void predicate(_PersonWithAddressTemplate<PersonWithAddress> template)) {
+    final _PersonWithAddressTemplate<PersonWithAddress> template =
+        new _PersonWithAddressTemplate<PersonWithAddress>(this);
+    predicate(template);
+    return new PersonWithAddressImm.fromMap(template._mutations);
+  }
+
+  @override
+  Map<String, dynamic> toJson() =>
+      super.toJson()..addAll(<String, dynamic>{'address': this.address});
+}
+
+/// The mutable interface for [PersonWithAddress]
+abstract class PersonWithAddressMut extends PersonWithAddress with PersonMut {
+  @override
+  AddressMut get address;
+  set address(Address value);
+}
+
+/// The template implementation of [PersonWithAddressMut]
+class _PersonWithAddressTemplate<T extends PersonWithAddress>
+    extends _PersonTemplate<T> implements PersonWithAddressMut {
   @override
   AddressMut get address {
     if (_mutations['address'] == null)
-      _mutations['address'] = new _AddressTemplate(null);
+      _mutations['address'] = new _AddressTemplate<Address>(null);
     return _mutations['address'];
   }
 
@@ -265,10 +292,104 @@ class _EmployeeTemplate implements EmployeeMut {
     _mutations['address'] = value;
   }
 
+  _PersonWithAddressTemplate(T source) : super(source) {
+    _mutations['address'] = source?.address != null
+        ? new _AddressTemplate<Address>(source.address)
+        : null;
+  }
+
+  @override
+  Map<String, dynamic> _mappify() => super._mappify()
+    ..addAll(<String, dynamic>{'address': _mutations['address']});
+}
+
+// **************************************************************************
+// Generator: OpticsGenerator
+// Target: abstract class Employee
+// **************************************************************************
+
+/// The immutable implementation of [Employee]
+class EmployeeImm extends PersonWithAddressImm implements Employee {
+  @override
+  final int id;
+  @override
+  final Employee reportsTo;
+  EmployeeImm(
+      {this.id,
+      this.reportsTo,
+      Address address,
+      String firstName,
+      String lastName})
+      : super(address: address, firstName: firstName, lastName: lastName);
+
+  factory EmployeeImm.fromMap(Map<String, dynamic> source) => new EmployeeImm(
+      id: source['id'],
+      reportsTo: source['reportsTo'] != null
+          ? new EmployeeImm.fromMap(
+              source['reportsTo'] is _EmployeeTemplate<Employee>
+                  ? source['reportsTo']._mappify()
+                  : source['reportsTo'] is EmployeeImm
+                      ? source['reportsTo'].toJson()
+                      : source['reportsTo'])
+          : null,
+      address: source['address'] != null
+          ? new AddressImm.fromMap(
+              source['address'] is _AddressTemplate<Address>
+                  ? source['address']._mappify()
+                  : source['address'] is AddressImm
+                      ? source['address'].toJson()
+                      : source['address'])
+          : null,
+      firstName: source['firstName'],
+      lastName: source['lastName']);
+
+  factory EmployeeImm.fromLens(
+      void predicate(_EmployeeTemplate<Employee> template)) {
+    final _EmployeeTemplate<Employee> template =
+        new _EmployeeTemplate<Employee>(null);
+    predicate(template);
+    return new EmployeeImm.fromMap(template._mutations);
+  }
+
+  @override
+  EmployeeImm lens(void predicate(_EmployeeTemplate<Employee> template)) {
+    final _EmployeeTemplate<Employee> template =
+        new _EmployeeTemplate<Employee>(this);
+    predicate(template);
+    return new EmployeeImm.fromMap(template._mutations);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll(<String, dynamic>{'id': this.id, 'reportsTo': this.reportsTo});
+}
+
+/// The mutable interface for [Employee]
+abstract class EmployeeMut extends Employee
+    with PersonWithAddressMut, PersonMut {
+  @override
+  int get id;
+  set id(int value);
+
+  @override
+  EmployeeMut get reportsTo;
+  set reportsTo(Employee value);
+}
+
+/// The template implementation of [EmployeeMut]
+class _EmployeeTemplate<T extends Employee>
+    extends _PersonWithAddressTemplate<T> implements EmployeeMut {
+  @override
+  int get id => _mutations['id'];
+  @override
+  set id(int value) {
+    _mutations['id'] = value;
+  }
+
   @override
   EmployeeMut get reportsTo {
     if (_mutations['reportsTo'] == null)
-      _mutations['reportsTo'] = new _EmployeeTemplate(null);
+      _mutations['reportsTo'] = new _EmployeeTemplate<Employee>(null);
     return _mutations['reportsTo'];
   }
 
@@ -277,24 +398,19 @@ class _EmployeeTemplate implements EmployeeMut {
     _mutations['reportsTo'] = value;
   }
 
-  _EmployeeTemplate(this.source) {
-    _mutations['address'] =
-        source?.address != null ? new _AddressTemplate(source.address) : null;
-    _mutations['firstName'] = source?.firstName;
+  _EmployeeTemplate(T source) : super(source) {
     _mutations['id'] = source?.id;
-    _mutations['lastName'] = source?.lastName;
     _mutations['reportsTo'] = source?.reportsTo != null
-        ? new _EmployeeTemplate(source.reportsTo)
+        ? new _EmployeeTemplate<Employee>(source.reportsTo)
         : null;
   }
 
-  Map<String, dynamic> _mappify() => <String, dynamic>{
-        'address': _mutations['address'],
-        'firstName': _mutations['firstName'],
-        'id': _mutations['id'],
-        'lastName': _mutations['lastName'],
-        'reportsTo': _mutations['reportsTo']
-      };
+  @override
+  Map<String, dynamic> _mappify() => super._mappify()
+    ..addAll(<String, dynamic>{
+      'id': _mutations['id'],
+      'reportsTo': _mutations['reportsTo']
+    });
 }
 
 // **************************************************************************
@@ -312,19 +428,25 @@ class AddressImm implements Address {
   final String town;
   @override
   final String country;
-  AddressImm(this.country, this.number, this.street, this.town);
+  AddressImm({this.country, this.number, this.street, this.town});
 
   factory AddressImm.fromMap(Map<String, dynamic> source) => new AddressImm(
-      source['country'], source['number'], source['street'], source['town']);
+      country: source['country'],
+      number: source['number'],
+      street: source['street'],
+      town: source['town']);
 
-  factory AddressImm.fromLens(void predicate(_AddressTemplate template)) {
-    final _AddressTemplate template = new _AddressTemplate(null);
+  factory AddressImm.fromLens(
+      void predicate(_AddressTemplate<Address> template)) {
+    final _AddressTemplate<Address> template =
+        new _AddressTemplate<Address>(null);
     predicate(template);
     return new AddressImm.fromMap(template._mutations);
   }
 
-  AddressImm lens(void predicate(_AddressTemplate template)) {
-    final _AddressTemplate template = new _AddressTemplate(this);
+  AddressImm lens(void predicate(_AddressTemplate<Address> template)) {
+    final _AddressTemplate<Address> template =
+        new _AddressTemplate<Address>(this);
     predicate(template);
     return new AddressImm.fromMap(template._mutations);
   }
@@ -357,8 +479,8 @@ abstract class AddressMut extends Address {
 }
 
 /// The template implementation of [AddressMut]
-class _AddressTemplate implements AddressMut {
-  final Address source;
+class _AddressTemplate<T extends Address> implements AddressMut {
+  final T source;
   final Map<String, dynamic> _mutations = <String, dynamic>{};
 
   @override

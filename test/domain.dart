@@ -19,15 +19,23 @@ abstract class Company {
 }
 
 @optics
-abstract class Employee {
-
-  int get id;
+abstract class Person {
 
   String get firstName;
 
   String get lastName;
+}
+
+@optics
+abstract class PersonWithAddress extends Person {
 
   Address get address;
+}
+
+@optics
+abstract class Employee extends PersonWithAddress {
+
+  int get id;
 
   Employee get reportsTo;
 }

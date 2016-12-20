@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 bool isDartCoreReturnType(PropertyAccessorElement property) => property.returnType.element.library.name.compareTo('dart.core') == 0;
 
@@ -13,6 +14,21 @@ List<PropertyAccessorElement> getAlphabetizedProperties(ClassElement element) {
       ..sort((PropertyAccessorElement pA, PropertyAccessorElement pB) => pA.displayName.compareTo(pB.displayName));
 
   return properties;
+}
+
+List<PropertyAccessorElement> getRecursiveAlphabetizedProperties(ClassElement element, {List<PropertyAccessorElement> properties}) {
+  properties ??= <PropertyAccessorElement>[];
+
+  properties.addAll(element.accessors
+      .where((PropertyAccessorElement property) => property.isPublic)
+      .toList(growable: false)
+    ..sort((PropertyAccessorElement pA, PropertyAccessorElement pB) => pA.displayName.compareTo(pB.displayName)));
+
+  element.allSupertypes
+      .where((InterfaceType interfaceType) => interfaceType.displayName.compareTo('Object') != 0)
+      .forEach((InterfaceType interfaceType) => getRecursiveAlphabetizedProperties(interfaceType.element, properties: properties));
+
+  return properties.toSet().toList();
 }
 
 PropertyData getPropertyData(PropertyAccessorElement property) {

@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'package:optics/src/class_builder.dart';
 
@@ -10,11 +11,21 @@ class TemplateImplementation extends ClassBuilder {
         super(element, suffix: 'Template', isAbstract: false, isPrivate: true, implementsList: <String>['${element.displayName}Mut'], comment: 'The template implementation of [${element.displayName}Mut]');
 
   @override
+  String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
+    return super.writeDeclaration(genericTypes: <String>['T extends ${element.displayName}'], customExtendsList: element.allSupertypes
+        .map((InterfaceType type) => type.displayName)
+        .where((String type) => type.compareTo('Object') != 0)
+        .map((String type) => '_${type}Template<T>'));
+  }
+
+  @override
   String writeClassProperties() {
     final StringBuffer buffer = new StringBuffer();
 
-    buffer.writeln('final ${element.displayName} source;');
-    buffer.writeln('final Map<String, dynamic> _mutations = <String, dynamic>{};');
+    if (!isSubClass) {
+      buffer.writeln('final T source;');
+      buffer.writeln('final Map<String, dynamic> _mutations = <String, dynamic>{};');
+    }
 
     return buffer.toString();
   }
@@ -27,12 +38,12 @@ class TemplateImplementation extends ClassBuilder {
 
     if (propertyData is utils.CustomObjectData) {
       buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName} {');
-      buffer.writeln('''if (_mutations['${property.displayName}'] == null) _mutations['${property.displayName}'] = new _${propertyData.asInterfaceDisplayName}Template(null);''');
+      buffer.writeln('''if (_mutations['${property.displayName}'] == null) _mutations['${property.displayName}'] = new _${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}>(null);''');
       buffer.writeln('''return _mutations['${property.displayName}'];}''');
     } else if (propertyData is utils.ListData) {
       buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName} {');
       buffer.writeln('''if (_mutations['${property.displayName}'] == null) _mutations['${property.displayName}'] = <${propertyData.genericType}>[];''');
-      buffer.writeln('''if (_mutations['${property.displayName}'].firstWhere((${propertyData.genericType} entry) => entry is! _${propertyData.genericType}Template, orElse: () => null) != null) _mutations['${property.displayName}'] = _mutations['${property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template ? entry : new _${propertyData.genericType}Template(entry)).toList();''');
+      buffer.writeln('''if (_mutations['${property.displayName}'].firstWhere((${propertyData.genericType} entry) => entry is! _${propertyData.genericType}Template<${propertyData.genericType}>, orElse: () => null) != null) _mutations['${property.displayName}'] = _mutations['${property.displayName}'].map((${propertyData.genericType} entry) => entry is _${propertyData.genericType}Template<${propertyData.genericType}> ? entry : new _${propertyData.genericType}Template<${propertyData.genericType}>(entry)).toList();''');
       buffer.writeln('''return _mutations['${property.displayName}'];}''');
     } else {
       buffer.writeln('''@override ${propertyData.asMutableDisplayName} get ${property.displayName} => _mutations['${property.displayName}'];''');
@@ -47,13 +58,14 @@ class TemplateImplementation extends ClassBuilder {
   String writeConstructor() {
     final StringBuffer buffer = new StringBuffer();
 
-    buffer.writeln('$className(this.source) {');
+    if (isSubClass) buffer.writeln('$className(T source) : super(source) {');
+    else buffer.writeln('$className(this.source) {');
 
     final String args = utils.getAlphabetizedProperties(element)
         .map(utils.getPropertyData)
         .map((utils.PropertyData propertyData) {
-          if (propertyData is utils.CustomObjectData) return '''_mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new _${propertyData.asInterfaceDisplayName}Template(source.${propertyData.property.displayName}) : null''';
-          else if (propertyData is utils.ListData) return '''_mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asMutableDisplayName}.from(source.${propertyData.property.displayName}.map((${propertyData.genericType} entry) => new _${propertyData.genericType}Template(entry))) : null''';
+          if (propertyData is utils.CustomObjectData) return '''_mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new _${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}>(source.${propertyData.property.displayName}) : null''';
+          else if (propertyData is utils.ListData) return '''_mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asMutableDisplayName}.from(source.${propertyData.property.displayName}.map((${propertyData.genericType} entry) => new _${propertyData.genericType}Template<${propertyData.genericType}>(entry))) : null''';
           return '''_mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName}''';
         })
         .join(';');
@@ -73,7 +85,8 @@ class TemplateImplementation extends ClassBuilder {
         .map((String propertyName) => ''''$propertyName':_mutations['$propertyName']''')
         .join(', ');
 
-    buffer.writeln('Map<String, dynamic> _mappify() => <String, dynamic>{$properties};');
+    if (isSubClass) buffer.writeln('@override Map<String, dynamic> _mappify() => super._mappify()..addAll(<String, dynamic>{$properties});');
+    else buffer.writeln('Map<String, dynamic> _mappify() => <String, dynamic>{$properties};');
 
     return buffer.toString();
   }
