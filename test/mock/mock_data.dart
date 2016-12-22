@@ -1,6 +1,6 @@
-import '../test/domain/company.g.dart';
-import '../test/domain/address.g.dart';
-import '../test/domain/employee.g.dart';
+import '../../test/domain/company.g.dart';
+import '../../test/domain/address.g.dart';
+import '../../test/domain/employee.g.dart';
 
 final CompanyImmutable company_A = new CompanyImmutable.fromMap(<String, dynamic>{
   'name': 'Springfield nuclear power plant',

@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'mock_data.dart' as data;
+import 'mock/mock_data.dart' as data;
 
 import 'domain/employee.g.dart';
 

@@ -11,7 +11,7 @@ before_install:
 script:
   - set -e
   - dart test/tool/build.dart
-  - pub run test test/tests_all.dart
+  - pub run test test/test_all.dart
 after_success:
   - pub global activate dart_coveralls
-  - pub global run dart_coveralls:dart_coveralls report --debug --exclude-test-files --token=$REPO_TOKEN test/tests_all.dart
+  - pub global run dart_coveralls:dart_coveralls report --debug --exclude-test-files --token=$REPO_TOKEN test/test_all.dart

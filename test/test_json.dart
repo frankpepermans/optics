@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 
-import 'mock_data.dart' as data;
+import 'mock/mock_data.dart' as data;
 
 void main() {
 
