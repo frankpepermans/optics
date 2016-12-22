@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-import 'package:optics/optics.dart';
-import '../test/domain.dart';
-
-import '../test/mock_data.dart' as data;
+import '../test/domain/company.g.dart';
+import '../test/domain/address.g.dart';
+import '../test/domain/employee.g.dart';
 
 void main() {
-  CompanyImm company = new CompanyImm.fromMap({
+  CompanyImmutable company = new CompanyImmutable.fromMap({
     'name': 'ACME corp',
     'founded': new DateTime(2016, 12 ,1)
   });
@@ -24,8 +23,8 @@ void main() {
         template.address.town = 'Looney Tunes Town';
 
         /// We can also add an employee
-        template.employees.add(new EmployeeImm(
-          address: new AddressImm(
+        template.employees.add(new EmployeeImmutable(
+          address: new AddressImmutable(
             country: 'United',
             number: '17',
             street: 'Mount Ephraim Road',
@@ -37,7 +36,7 @@ void main() {
         ));
 
         /// ...and mutate him right away
-        EmployeeMut employee = template.employees.first;
+        EmployeeMutable employee = template.employees.first;
 
         employee.address.country += ' Kingdom';
       });

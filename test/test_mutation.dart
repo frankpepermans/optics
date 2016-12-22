@@ -2,14 +2,15 @@ import 'package:test/test.dart';
 
 import 'mock_data.dart' as data;
 
-import 'domain.dart';
+import 'domain/employee.g.dart';
+import 'domain/company.g.dart';
 
 void main() {
 
   String stringifyEmployee(Employee employee) => '${employee.firstName} ${employee.lastName}';
 
   test('Simple change', () {
-    CompanyImm company = data.company_A.lens((template) {
+    CompanyImmutable company = data.company_A.lens((template) {
       template.name = 'Shelbyville nuclear power plant';
     });
 
@@ -18,7 +19,7 @@ void main() {
   });
 
   test('Reference change', () {
-    EmployeeImm employee = data.employee_C.lens((template) {
+    EmployeeImmutable employee = data.employee_C.lens((template) {
       template.reportsTo = data.employee_A;
     });
 
@@ -26,12 +27,12 @@ void main() {
   });
 
   test('New instance', () {
-    CompanyImm company = data.company_A.lens((template) {
-      template.employees.add(new EmployeeImm.fromMap(<String, dynamic>{
+    CompanyImmutable company = data.company_A.lens((template) {
+      template.employees.add(new EmployeeImmutable.fromMap(<String, dynamic>{
         'firstName': 'Carl'
       }));
 
-      (template.employees.last as EmployeeMut).reportsTo.firstName = 'Lenny';
+      (template.employees.last as EmployeeMutable).reportsTo.firstName = 'Lenny';
     });
 
     expect(company.employees.last.reportsTo.firstName, 'Lenny');

@@ -1,9 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 
 import 'package:optics/src/element_utils.dart' as utils;
 
 class ClassBuilder {
+
+  static final String immutable_suffix = 'Immutable';
+  static final String mutable_suffix = 'Mutable';
 
   final ClassElement element;
   final String className;

@@ -1,12 +1,14 @@
-import 'domain.dart';
+import '../test/domain/company.g.dart';
+import '../test/domain/address.g.dart';
+import '../test/domain/employee.g.dart';
 
-final CompanyImm company_A = new CompanyImm.fromMap(<String, dynamic>{
+final CompanyImmutable company_A = new CompanyImmutable.fromMap(<String, dynamic>{
   'name': 'Springfield nuclear power plant',
   'founded': new DateTime(1950, 4, 1),
   'employees': <Employee>[employee_A, employee_B, employee_C]
 });
 
-final EmployeeImm employee_A = new EmployeeImm.fromMap(<String, dynamic>{
+final EmployeeImmutable employee_A = new EmployeeImmutable.fromMap(<String, dynamic>{
   'id': 999,
   'firstName': 'Homer',
   'lastName': 'Simpson',
@@ -14,20 +16,20 @@ final EmployeeImm employee_A = new EmployeeImm.fromMap(<String, dynamic>{
   'reportsTo': employee_B
 });
 
-final EmployeeImm employee_B = new EmployeeImm.fromMap(<String, dynamic>{
+final EmployeeImmutable employee_B = new EmployeeImmutable.fromMap(<String, dynamic>{
   'id': 2,
   'firstName': 'Waylon',
   'lastName': 'Smithers',
   'reportsTo': employee_C
 });
 
-final EmployeeImm employee_C = new EmployeeImm.fromMap(<String, dynamic>{
+final EmployeeImmutable employee_C = new EmployeeImmutable.fromMap(<String, dynamic>{
   'id': 1,
   'firstName': 'Montgomery',
   'lastName': 'Burns'
 });
 
-final AddressImm address_A = new AddressImm.fromMap(<String, dynamic>{
+final AddressImmutable address_A = new AddressImmutable.fromMap(<String, dynamic>{
   'street': 'Evergreen Terrace',
   'number': '742',
   'town': 'Springfield',

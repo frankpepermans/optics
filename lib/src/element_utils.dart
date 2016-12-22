@@ -1,6 +1,8 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
+import 'package:optics/src/class_builder.dart';
+
 bool isDartCoreReturnType(PropertyAccessorElement property) => property.returnType.element.library.name.compareTo('dart.core') == 0;
 
 bool isDartCollectionReturnType(PropertyAccessorElement property) => property.returnType.element.library.name.compareTo('dart.collection') == 0;
@@ -78,8 +80,8 @@ class CustomObjectData implements PropertyData {
 
   CustomObjectData(PropertyAccessorElement property) :
         this.property = property,
-        this.asImmutableDisplayName = '${property.returnType.displayName}Imm',
-        this.asMutableDisplayName = '${property.returnType.displayName}Mut',
+        this.asImmutableDisplayName = '${property.returnType.displayName}${ClassBuilder.immutable_suffix}',
+        this.asMutableDisplayName = '${property.returnType.displayName}${ClassBuilder.mutable_suffix}',
         this.asInterfaceDisplayName = property.returnType.displayName;
 }
 

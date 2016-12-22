@@ -8,14 +8,14 @@ import 'package:optics/src/element_utils.dart' as utils;
 class AbstractMutableImplementation extends ClassBuilder {
 
   AbstractMutableImplementation(ClassElement element) :
-        super(element, suffix: 'Mut', isAbstract: true, isPrivate: false, extendsList: <String>[element.displayName], comment: 'The mutable interface for [${element.displayName}]');
+        super(element, suffix: ClassBuilder.mutable_suffix, isAbstract: true, isPrivate: false, extendsList: <String>[element.displayName], comment: 'The mutable interface for [${element.displayName}]');
 
   @override
   String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
     return super.writeDeclaration(customMixinsList: element.allSupertypes
         .map((InterfaceType type) => type.displayName)
         .where((String type) => type.compareTo('Object') != 0)
-        .map((String type) => '${type}Mut'));
+        .map((String type) => '${type}${ClassBuilder.mutable_suffix}'));
   }
 
   @override

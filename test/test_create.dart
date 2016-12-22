@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 
 import 'mock_data.dart' as data;
 
-import 'domain.dart';
+import 'domain/employee.g.dart';
 
 void main() {
 
