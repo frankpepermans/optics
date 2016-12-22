@@ -30,7 +30,7 @@ class PersonWithAddressImmutable extends PersonImmutable
     return new PersonWithAddressImmutable(
         address: address != null
             ? new AddressImmutable.fromMap(address is AddressTemplate<Address>
-                ? address.mappify()
+                ? address.toJson()
                 : address is AddressImmutable ? address.toJson() : const {})
             : null,
         firstName: firstName,
@@ -89,6 +89,6 @@ class PersonWithAddressTemplate<T extends PersonWithAddress>
   }
 
   @override
-  Map<String, dynamic> mappify() => super.mappify()
+  Map<String, dynamic> toJson() => super.toJson()
     ..addAll(<String, dynamic>{'address': mutations['address']});
 }

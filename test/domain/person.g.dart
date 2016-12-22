@@ -79,7 +79,7 @@ class PersonTemplate<T extends Person> implements PersonMutable {
     mutations['lastName'] = source?.lastName;
   }
 
-  Map<String, dynamic> mappify() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'firstName': mutations['firstName'],
         'lastName': mutations['lastName']
       };

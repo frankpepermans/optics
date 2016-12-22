@@ -35,7 +35,7 @@ class TestEntityImmutable extends TestEntitySuperClassImmutable
         cyclicReference: cyclicReference != null
             ? new TestEntityImmutable.fromMap(
                 cyclicReference is TestEntityTemplate<TestEntity>
-                    ? cyclicReference.mappify()
+                    ? cyclicReference.toJson()
                     : cyclicReference is TestEntityImmutable
                         ? cyclicReference.toJson()
                         : const {})
@@ -125,7 +125,7 @@ class TestEntityTemplate<T extends TestEntity>
   }
 
   @override
-  Map<String, dynamic> mappify() => super.mappify()
+  Map<String, dynamic> toJson() => super.toJson()
     ..addAll(<String, dynamic>{
       'cyclicReference': mutations['cyclicReference'],
       'date': mutations['date'],

@@ -41,14 +41,14 @@ class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
         reportsTo: reportsTo != null
             ? new EmployeeImmutable.fromMap(
                 reportsTo is EmployeeTemplate<Employee>
-                    ? reportsTo.mappify()
+                    ? reportsTo.toJson()
                     : reportsTo is EmployeeImmutable
                         ? reportsTo.toJson()
                         : const {})
             : null,
         address: address != null
             ? new AddressImmutable.fromMap(address is AddressTemplate<Address>
-                ? address.mappify()
+                ? address.toJson()
                 : address is AddressImmutable ? address.toJson() : const {})
             : null,
         firstName: firstName,
@@ -118,7 +118,7 @@ class EmployeeTemplate<T extends Employee> extends PersonWithAddressTemplate<T>
   }
 
   @override
-  Map<String, dynamic> mappify() => super.mappify()
+  Map<String, dynamic> toJson() => super.toJson()
     ..addAll(<String, dynamic>{
       'id': mutations['id'],
       'reportsTo': mutations['reportsTo']

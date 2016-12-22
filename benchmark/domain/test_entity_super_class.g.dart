@@ -69,5 +69,5 @@ class TestEntitySuperClassTemplate<T extends TestEntitySuperClass>
     mutations['id'] = source?.id;
   }
 
-  Map<String, dynamic> mappify() => <String, dynamic>{'id': mutations['id']};
+  Map<String, dynamic> toJson() => <String, dynamic>{'id': mutations['id']};
 }

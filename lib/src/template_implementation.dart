@@ -85,8 +85,8 @@ class TemplateImplementation extends ClassBuilder {
         .map((String propertyName) => ''''$propertyName':mutations['$propertyName']''')
         .join(', ');
 
-    if (isSubClass) buffer.writeln('@override Map<String, dynamic> mappify() => super.mappify()..addAll(<String, dynamic>{$properties});');
-    else buffer.writeln('Map<String, dynamic> mappify() => <String, dynamic>{$properties};');
+    if (isSubClass) buffer.writeln('@override Map<String, dynamic> toJson() => super.toJson()..addAll(<String, dynamic>{$properties});');
+    else buffer.writeln('Map<String, dynamic> toJson() => <String, dynamic>{$properties};');
 
     return buffer.toString();
   }

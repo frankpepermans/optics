@@ -35,7 +35,7 @@ class CompanyImmutable implements Company {
     return new CompanyImmutable(
         address: address != null
             ? new AddressImmutable.fromMap(address is AddressTemplate<Address>
-                ? address.mappify()
+                ? address.toJson()
                 : address is AddressImmutable ? address.toJson() : const {})
             : null,
         employees: employees != null
@@ -153,7 +153,7 @@ class CompanyTemplate<T extends Company> implements CompanyMutable {
     mutations['name'] = source?.name;
   }
 
-  Map<String, dynamic> mappify() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'address': mutations['address'],
         'employees': mutations['employees'],
         'founded': mutations['founded'],

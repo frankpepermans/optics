@@ -116,7 +116,7 @@ class AddressTemplate<T extends Address> implements AddressMutable {
     mutations['town'] = source?.town;
   }
 
-  Map<String, dynamic> mappify() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'country': mutations['country'],
         'number': mutations['number'],
         'street': mutations['street'],
