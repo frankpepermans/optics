@@ -16,6 +16,13 @@ import 'person_with_address.g.dart';
 
 export 'employee.dart';
 
+/// All public properties for [Employee]
+abstract class EmployeeProps {
+  static const String id = 'id';
+
+  static const String reportsTo = 'reportsTo';
+}
+
 /// The immutable implementation of [Employee]
 class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
   @override

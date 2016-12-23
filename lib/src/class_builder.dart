@@ -31,6 +31,8 @@ class ClassBuilder {
     for (int i=0, len=element.accessors.length; i<len; i++) {
       PropertyAccessorElement property = element.accessors[i];
 
+      if (property.returnType.displayName.compareTo('void') == 0) throw new ArgumentError('Make sure that the class is abstract and that all properties are getters');
+
       if (property.isPublic) buffer.writeln(writeProperty(property));
     }
 

@@ -34,8 +34,9 @@ List<PropertyAccessorElement> getRecursiveAlphabetizedProperties(ClassElement el
 }
 
 PropertyData getPropertyData(PropertyAccessorElement property) {
-  final bool isCore = isDartCoreReturnType(property);
-  final bool isCollection = isList(property);
+  final bool isVoid = property.returnType.displayName.compareTo('dynamic') == 0;
+  final bool isCore = isVoid ? true : isDartCoreReturnType(property);
+  final bool isCollection = isVoid ? false : isList(property);
   final bool isCustomObject = !isCore && !isCollection;
 
   if (isCustomObject) return new CustomObjectData(property);

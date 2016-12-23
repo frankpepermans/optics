@@ -4,6 +4,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'package:optics/src/properties_implementation.dart';
 import 'package:optics/src/immutable_implementation.dart';
 import 'package:optics/src/abstract_mutable_implementation.dart';
 import 'package:optics/src/template_implementation.dart';
@@ -61,6 +62,7 @@ class OpticsGenerator extends Generator {
 
         buffer.writeln('''export '${element.enclosingElement.displayName}';''');
 
+        buffer.writeln(new PropertiesImplementation(element).write());
         buffer.writeln(new ImmutableImplementation(element).write());
         buffer.writeln(new AbstractMutableImplementation(element).write());
         buffer.writeln(new TemplateImplementation(element).write());

@@ -13,6 +13,17 @@ import 'address.dart';
 
 export 'address.dart';
 
+/// All public properties for [Address]
+abstract class AddressProps {
+  static const String street = 'street';
+
+  static const String number = 'number';
+
+  static const String town = 'town';
+
+  static const String country = 'country';
+}
+
 /// The immutable implementation of [Address]
 class AddressImmutable implements Address {
   @override

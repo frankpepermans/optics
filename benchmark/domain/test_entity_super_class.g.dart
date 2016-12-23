@@ -13,6 +13,11 @@ import 'test_entity_super_class.dart';
 
 export 'test_entity_super_class.dart';
 
+/// All public properties for [TestEntitySuperClass]
+abstract class TestEntitySuperClassProps {
+  static const String id = 'id';
+}
+
 /// The immutable implementation of [TestEntitySuperClass]
 class TestEntitySuperClassImmutable implements TestEntitySuperClass {
   @override

@@ -13,6 +13,13 @@ import 'person.dart';
 
 export 'person.dart';
 
+/// All public properties for [Person]
+abstract class PersonProps {
+  static const String firstName = 'firstName';
+
+  static const String lastName = 'lastName';
+}
+
 /// The immutable implementation of [Person]
 class PersonImmutable implements Person {
   @override

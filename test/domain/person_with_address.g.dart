@@ -15,6 +15,11 @@ import 'person.g.dart';
 
 export 'person_with_address.dart';
 
+/// All public properties for [PersonWithAddress]
+abstract class PersonWithAddressProps {
+  static const String address = 'address';
+}
+
 /// The immutable implementation of [PersonWithAddress]
 class PersonWithAddressImmutable extends PersonImmutable
     implements PersonWithAddress {

@@ -14,6 +14,15 @@ import 'test_entity_super_class.g.dart';
 
 export 'test_entity.dart';
 
+/// All public properties for [TestEntity]
+abstract class TestEntityProps {
+  static const String name = 'name';
+
+  static const String date = 'date';
+
+  static const String cyclicReference = 'cyclicReference';
+}
+
 /// The immutable implementation of [TestEntity]
 class TestEntityImmutable extends TestEntitySuperClassImmutable
     implements TestEntity {

@@ -15,6 +15,17 @@ import 'employee.g.dart';
 
 export 'company.dart';
 
+/// All public properties for [Company]
+abstract class CompanyProps {
+  static const String name = 'name';
+
+  static const String founded = 'founded';
+
+  static const String address = 'address';
+
+  static const String employees = 'employees';
+}
+
 /// The immutable implementation of [Company]
 class CompanyImmutable implements Company {
   @override
