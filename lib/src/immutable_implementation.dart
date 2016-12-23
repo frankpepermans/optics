@@ -43,8 +43,8 @@ class ImmutableImplementation extends ClassBuilder {
         .map((String value) => '$value:$value')
         .join(', ');
 
-      buffer.writeln('$className({${allProperties.join(', ')}}) : super($superArgs);');
-    } else buffer.writeln('$className({${allProperties.join(', ')}});');
+      buffer.writeln('const $className({${allProperties.join(', ')}}) : super($superArgs);');
+    } else buffer.writeln('const $className({${allProperties.join(', ')}});');
 
     buffer.writeln();
 
