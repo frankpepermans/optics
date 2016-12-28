@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'package:optics/src/element_utils.dart' as utils;
 
@@ -19,7 +20,7 @@ class ClassBuilder {
   ClassBuilder(ClassElement element, {this.suffix, this.isAbstract, this.isPrivate, this.implementsList: const [], this.extendsList: const [], this.comment}) :
         this.element = element,
         className = '${isPrivate ? '_' : ''}${element.displayName}$suffix',
-        isSubClass = element.allSupertypes.length > 1;
+        isSubClass = element.allSupertypes.where((InterfaceType type) => !type.element.library.isDartCore).length >= 1;
 
   String write() {
     final StringBuffer buffer = new StringBuffer();
@@ -49,6 +50,12 @@ class ClassBuilder {
     final StringBuffer buffer = new StringBuffer();
     final List<String> allExtends = new List<String>()..addAll(extendsList)..addAll(customExtendsList);
     final List<String> allImplements = new List<String>()..addAll(implementsList)..addAll(customImplementsList);
+
+    if (allExtends.contains('Comparable')) {
+      allExtends.remove('Comparable');
+      allImplements.add('Comparable');
+    }
+
     final List<String> allMixins = new List<String>()..addAll(customMixinsList)..addAll(extendsList.length > 1 ? extendsList.sublist(1) : const []);
     final String extendsPart = allExtends.isNotEmpty ? allExtends.first : '';
     final String implementsPart = allImplements.join(', ');

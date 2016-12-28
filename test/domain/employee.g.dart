@@ -29,7 +29,7 @@ class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
   final int id;
   @override
   final Employee reportsTo;
-  EmployeeImmutable(
+  const EmployeeImmutable(
       {this.id,
       this.reportsTo,
       Address address,
@@ -81,6 +81,16 @@ class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll(<String, dynamic>{'id': this.id, 'reportsTo': this.reportsTo});
+  @override
+  int compareTo(dynamic other) {
+    if (other is Employee && super.compareTo(other) == 0) {
+      return (compareObjects(id, other?.id) == 0 &&
+              compareObjects(reportsTo, other?.reportsTo) == 0)
+          ? 0
+          : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [Employee]

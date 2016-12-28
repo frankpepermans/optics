@@ -32,8 +32,7 @@ class TestEntityImmutable extends TestEntitySuperClassImmutable
   final DateTime date;
   @override
   final TestEntity cyclicReference;
-  TestEntityImmutable({this.cyclicReference, this.date, this.name, int id})
-      : super(id: id);
+  const TestEntityImmutable({this.cyclicReference, this.date, this.name});
 
   factory TestEntityImmutable.fromMap(Map<String, dynamic> source) {
     final TestEntity cyclicReference = source['cyclicReference'];
@@ -62,7 +61,6 @@ class TestEntityImmutable extends TestEntitySuperClassImmutable
     return new TestEntityImmutable.fromMap(template.mutations);
   }
 
-  @override
   TestEntityImmutable lens(
       void predicate(TestEntityTemplate<TestEntity> template)) {
     final TestEntityTemplate<TestEntity> template =
@@ -71,13 +69,22 @@ class TestEntityImmutable extends TestEntitySuperClassImmutable
     return new TestEntityImmutable.fromMap(template.mutations);
   }
 
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'cyclicReference': this.cyclicReference,
+        'date': this.date,
+        'name': this.name
+      };
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll(<String, dynamic>{
-      'cyclicReference': this.cyclicReference,
-      'date': this.date,
-      'name': this.name
-    });
+  int compareTo(dynamic other) {
+    if (other is TestEntity) {
+      return (compareObjects(cyclicReference, other?.cyclicReference) == 0 &&
+              compareObjects(date, other?.date) == 0 &&
+              compareObjects(name, other?.name) == 0)
+          ? 0
+          : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [TestEntity]
@@ -99,6 +106,9 @@ abstract class TestEntityMutable extends TestEntity
 /// The template implementation of [TestEntityMutable]
 class TestEntityTemplate<T extends TestEntity>
     extends TestEntitySuperClassTemplate<T> implements TestEntityMutable {
+  final T source;
+  final Map<String, dynamic> mutations = <String, dynamic>{};
+
   @override
   String get name => mutations['name'];
   @override
@@ -125,7 +135,7 @@ class TestEntityTemplate<T extends TestEntity>
     mutations['cyclicReference'] = value;
   }
 
-  TestEntityTemplate(T source) : super(source) {
+  TestEntityTemplate(this.source) {
     mutations['cyclicReference'] = source?.cyclicReference != null
         ? new TestEntityTemplate<TestEntity>(source.cyclicReference)
         : null;
@@ -133,11 +143,9 @@ class TestEntityTemplate<T extends TestEntity>
     mutations['name'] = source?.name;
   }
 
-  @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll(<String, dynamic>{
-      'cyclicReference': mutations['cyclicReference'],
-      'date': mutations['date'],
-      'name': mutations['name']
-    });
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'cyclicReference': mutations['cyclicReference'],
+        'date': mutations['date'],
+        'name': mutations['name']
+      };
 }

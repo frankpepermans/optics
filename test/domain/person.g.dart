@@ -26,7 +26,7 @@ class PersonImmutable implements Person {
   final String firstName;
   @override
   final String lastName;
-  PersonImmutable({this.firstName, this.lastName});
+  const PersonImmutable({this.firstName, this.lastName});
 
   factory PersonImmutable.fromMap(Map<String, dynamic> source) {
     final String firstName = source['firstName'];
@@ -49,6 +49,16 @@ class PersonImmutable implements Person {
 
   Map<String, dynamic> toJson() =>
       <String, dynamic>{'firstName': this.firstName, 'lastName': this.lastName};
+  @override
+  int compareTo(dynamic other) {
+    if (other is Person) {
+      return (compareObjects(firstName, other?.firstName) == 0 &&
+              compareObjects(lastName, other?.lastName) == 0)
+          ? 0
+          : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [Person]

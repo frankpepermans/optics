@@ -34,7 +34,7 @@ class AddressImmutable implements Address {
   final String town;
   @override
   final String country;
-  AddressImmutable({this.country, this.number, this.street, this.town});
+  const AddressImmutable({this.country, this.number, this.street, this.town});
 
   factory AddressImmutable.fromMap(Map<String, dynamic> source) {
     final String country = source['country'];
@@ -66,6 +66,18 @@ class AddressImmutable implements Address {
         'street': this.street,
         'town': this.town
       };
+  @override
+  int compareTo(dynamic other) {
+    if (other is Address) {
+      return (compareObjects(country, other?.country) == 0 &&
+              compareObjects(number, other?.number) == 0 &&
+              compareObjects(street, other?.street) == 0 &&
+              compareObjects(town, other?.town) == 0)
+          ? 0
+          : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [Address]

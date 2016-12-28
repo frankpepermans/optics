@@ -36,7 +36,8 @@ class CompanyImmutable implements Company {
   final Address address;
   @override
   final Iterable<Employee> employees;
-  CompanyImmutable({this.address, this.employees, this.founded, this.name});
+  const CompanyImmutable(
+      {this.address, this.employees, this.founded, this.name});
 
   factory CompanyImmutable.fromMap(Map<String, dynamic> source) {
     final Address address = source['address'];
@@ -80,6 +81,18 @@ class CompanyImmutable implements Company {
         'founded': this.founded,
         'name': this.name
       };
+  @override
+  int compareTo(dynamic other) {
+    if (other is Company) {
+      return (compareObjects(address, other?.address) == 0 &&
+              compareIterables(employees, other?.employees) == 0 &&
+              compareObjects(founded, other?.founded) == 0 &&
+              compareObjects(name, other?.name) == 0)
+          ? 0
+          : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [Company]

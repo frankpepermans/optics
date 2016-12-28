@@ -25,8 +25,7 @@ class PersonWithAddressImmutable extends PersonImmutable
     implements PersonWithAddress {
   @override
   final Address address;
-  PersonWithAddressImmutable({this.address, String firstName, String lastName})
-      : super(firstName: firstName, lastName: lastName);
+  const PersonWithAddressImmutable({this.address});
 
   factory PersonWithAddressImmutable.fromMap(Map<String, dynamic> source) {
     final Address address = source['address'];
@@ -50,7 +49,6 @@ class PersonWithAddressImmutable extends PersonImmutable
     return new PersonWithAddressImmutable.fromMap(template.mutations);
   }
 
-  @override
   PersonWithAddressImmutable lens(
       void predicate(PersonWithAddressTemplate<PersonWithAddress> template)) {
     final PersonWithAddressTemplate<PersonWithAddress> template =
@@ -59,9 +57,14 @@ class PersonWithAddressImmutable extends PersonImmutable
     return new PersonWithAddressImmutable.fromMap(template.mutations);
   }
 
+  Map<String, dynamic> toJson() => <String, dynamic>{'address': this.address};
   @override
-  Map<String, dynamic> toJson() =>
-      super.toJson()..addAll(<String, dynamic>{'address': this.address});
+  int compareTo(dynamic other) {
+    if (other is PersonWithAddress) {
+      return (compareObjects(address, other?.address) == 0) ? 0 : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [PersonWithAddress]
@@ -75,6 +78,9 @@ abstract class PersonWithAddressMutable extends PersonWithAddress
 /// The template implementation of [PersonWithAddressMutable]
 class PersonWithAddressTemplate<T extends PersonWithAddress>
     extends PersonTemplate<T> implements PersonWithAddressMutable {
+  final T source;
+  final Map<String, dynamic> mutations = <String, dynamic>{};
+
   @override
   AddressMutable get address {
     if (mutations['address'] == null)
@@ -87,13 +93,12 @@ class PersonWithAddressTemplate<T extends PersonWithAddress>
     mutations['address'] = value;
   }
 
-  PersonWithAddressTemplate(T source) : super(source) {
+  PersonWithAddressTemplate(this.source) {
     mutations['address'] = source?.address != null
         ? new AddressTemplate<Address>(source.address)
         : null;
   }
 
-  @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll(<String, dynamic>{'address': mutations['address']});
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'address': mutations['address']};
 }

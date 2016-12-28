@@ -13,9 +13,11 @@ class TemplateImplementation extends ClassBuilder {
   @override
   String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
     return super.writeDeclaration(genericTypes: <String>['T extends ${element.displayName}'], customExtendsList: element.allSupertypes
-        .map((InterfaceType type) => type.displayName)
-        .where((String type) => type.compareTo('Object') != 0)
-        .map((String type) => '${type}Template<T>'));
+        .where((InterfaceType type) => type.displayName.compareTo('Object') != 0)
+        .map((InterfaceType type) {
+          if (type.element.library.isDartCore) return type.displayName;
+              return '${type.displayName}Template<T>';
+          }));
   }
 
   @override
@@ -87,6 +89,8 @@ class TemplateImplementation extends ClassBuilder {
 
     if (isSubClass) buffer.writeln('@override Map<String, dynamic> toJson() => super.toJson()..addAll(<String, dynamic>{$properties});');
     else buffer.writeln('Map<String, dynamic> toJson() => <String, dynamic>{$properties};');
+
+    buffer.writeln('@override int compareTo(dynamic other) => -1;');
 
     return buffer.toString();
   }

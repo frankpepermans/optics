@@ -13,9 +13,12 @@ class ImmutableImplementation extends ClassBuilder {
   @override
   String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
     return super.writeDeclaration(customExtendsList: element.allSupertypes
-      .map((InterfaceType type) => type.displayName)
-      .where((String type) => type.compareTo('Object') != 0)
-      .map((String type) => '${type}${ClassBuilder.immutable_suffix}'));
+      .where((InterfaceType type) => type.displayName.compareTo('Object') != 0)
+      .map((InterfaceType type) {
+        if (type.element.library.isDartCore) return type.displayName;
+
+        return '${type.displayName}${ClassBuilder.immutable_suffix}';
+      }));
   }
 
   @override
@@ -37,14 +40,16 @@ class ImmutableImplementation extends ClassBuilder {
 
     allProperties.addAll(superProperties);
 
+    final String allPropertiesList = allProperties.isNotEmpty ? '''{${allProperties.join(', ')}}''' : '';
+
     if (isSubClass) {
       final String superArgs = superProperties
         .map((String value) => value.split(' ').last)
         .map((String value) => '$value:$value')
         .join(', ');
 
-      buffer.writeln('const $className({${allProperties.join(', ')}}) : super($superArgs);');
-    } else buffer.writeln('const $className({${allProperties.join(', ')}});');
+      buffer.writeln('const $className($allPropertiesList) : super($superArgs);');
+    } else buffer.writeln('const $className($allPropertiesList);');
 
     buffer.writeln();
 
@@ -65,6 +70,13 @@ class ImmutableImplementation extends ClassBuilder {
       .map((PropertyAccessorElement property) => property.displayName)
       .map((String propertyName) => ''' '$propertyName':this.$propertyName ''')
       .join(', ');
+    final String comparisons = utils.getAlphabetizedProperties(element)
+      .map((PropertyAccessorElement property) {
+        if (utils.getPropertyData(property) is utils.ListData) return 'compareIterables(${property.displayName}, other?.${property.displayName}) == 0';
+
+        return 'compareObjects(${property.displayName}, other?.${property.displayName}) == 0';
+      })
+      .join(' && ');
 
     if (isSubClass) buffer.writeln('@override $className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
     else buffer.writeln('$className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
@@ -76,6 +88,17 @@ class ImmutableImplementation extends ClassBuilder {
 
     if (isSubClass) buffer.writeln('@override Map<String, dynamic> toJson() => super.toJson()..addAll(<String, dynamic>{$properties});');
     else buffer.writeln('Map<String, dynamic> toJson() => <String, dynamic>{$properties};');
+
+    if (comparisons.isNotEmpty) {
+      buffer.writeln('@override int compareTo(dynamic other) {');
+
+      if (isSubClass) buffer.writeln('if (other is ${element.displayName} && super.compareTo(other) == 0) {return ($comparisons) ? 0 : 1;}');
+      else buffer.writeln('if (other is ${element.displayName}) {return ($comparisons) ? 0 : 1;}');
+
+      buffer.writeln('return -1;}');
+    } else {
+      if (!isSubClass) buffer.writeln('@override int compareTo(dynamic other) => 0;');
+    }
 
     return buffer.toString();
   }

@@ -13,9 +13,11 @@ class AbstractMutableImplementation extends ClassBuilder {
   @override
   String writeDeclaration({List<String> genericTypes: const [], Iterable<String> customExtendsList: const [], Iterable<String> customImplementsList: const [], Iterable<String> customMixinsList: const []}) {
     return super.writeDeclaration(customMixinsList: element.allSupertypes
-        .map((InterfaceType type) => type.displayName)
-        .where((String type) => type.compareTo('Object') != 0)
-        .map((String type) => '${type}${ClassBuilder.mutable_suffix}'));
+        .where((InterfaceType type) => type.displayName.compareTo('Object') != 0)
+        .map((InterfaceType type) {
+          if (type.element.library.isDartCore) return type.displayName;
+          return '${type.displayName}${ClassBuilder.mutable_suffix}';
+        }));
   }
 
   @override

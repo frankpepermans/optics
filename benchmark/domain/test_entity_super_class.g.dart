@@ -22,7 +22,7 @@ abstract class TestEntitySuperClassProps {
 class TestEntitySuperClassImmutable implements TestEntitySuperClass {
   @override
   final int id;
-  TestEntitySuperClassImmutable({this.id});
+  const TestEntitySuperClassImmutable({this.id});
 
   factory TestEntitySuperClassImmutable.fromMap(Map<String, dynamic> source) {
     final int id = source['id'];
@@ -48,6 +48,13 @@ class TestEntitySuperClassImmutable implements TestEntitySuperClass {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{'id': this.id};
+  @override
+  int compareTo(dynamic other) {
+    if (other is TestEntitySuperClass) {
+      return (compareObjects(id, other?.id) == 0) ? 0 : 1;
+    }
+    return -1;
+  }
 }
 
 /// The mutable interface for [TestEntitySuperClass]
