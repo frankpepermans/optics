@@ -77,11 +77,23 @@ class ImmutableImplementation extends ClassBuilder {
         return 'compareObjects(${property.displayName}, other?.${property.displayName}) == 0';
       })
       .join(' && ');
+    final Iterable<String> genericClassTypes = utils.getRecursiveAlphabetizedProperties(element)
+        .map(utils.getPropertyData)
+        .where((utils.PropertyData propertyData) => propertyData.isGenericClassType)
+        .map((utils.PropertyData propertyData) => propertyData.asInterfaceDisplayName);
 
-    if (isSubClass) buffer.writeln('@override $className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
-    else buffer.writeln('$className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
+    if (genericClassTypes.isNotEmpty) {
+      if (isSubClass) buffer.writeln('@override $className lens(void predicate(${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}> template)) {');
+      else buffer.writeln('$className lens(void predicate(${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}> template)) {');
 
-    buffer.writeln('final ${element.displayName}Template<${element.displayName}> template = new ${element.displayName}Template<${element.displayName}>(this);');
+      buffer.writeln('final ${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}> template = new ${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}>(this);');
+    } else {
+      if (isSubClass) buffer.writeln('@override $className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
+      else buffer.writeln('$className lens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
+
+      buffer.writeln('final ${element.displayName}Template<${element.displayName}> template = new ${element.displayName}Template<${element.displayName}>(this);');
+    }
+
     buffer.writeln('predicate(template);');
     buffer.writeln('return new $className.fromMap(template.mutations);');
     buffer.writeln('}');
@@ -115,9 +127,15 @@ class ImmutableImplementation extends ClassBuilder {
     final String args = properties
         .map(utils.getPropertyData)
         .map((utils.PropertyData propertyData) {
-          if (propertyData is utils.CustomObjectData) return '''${propertyData.property.displayName}:${propertyData.property.displayName} != null ? new ${propertyData.asImmutableDisplayName}.fromMap(${propertyData.property.displayName} is ${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}> ? ${propertyData.property.displayName}.toJson() : ${propertyData.property.displayName} is ${propertyData.asInterfaceDisplayName}${ClassBuilder.immutable_suffix} ? ${propertyData.property.displayName}.toJson() : const {}) : null''';
-          else if (propertyData is utils.ListData) return '''${propertyData.property.displayName}:${propertyData.property.displayName} != null ? new ${propertyData.asImmutableDisplayName}(${propertyData.property.displayName}.map((${propertyData.genericType} entry) => entry is ${propertyData.genericType}Template<${propertyData.genericType}> ? new ${propertyData.genericType}${ClassBuilder.immutable_suffix}.fromMap(entry.mutations) : entry)) : null''';
-          return '''${propertyData.property.displayName}:${propertyData.property.displayName}''';
+          if (propertyData is utils.CustomObjectData) {
+            return '''${propertyData.property.displayName}:${propertyData.property.displayName} != null ? new ${propertyData.asImmutableDisplayName}.fromMap(${propertyData.property.displayName} is ${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}> ? ${propertyData.property.displayName}.toJson() : ${propertyData.property.displayName} is ${propertyData.asInterfaceDisplayName}${ClassBuilder.immutable_suffix} ? ${propertyData.property.displayName}.toJson() : const {}) : null''';
+          } else if (propertyData is utils.ListData) {
+            if (utils.isCustomObject(element, propertyData.genericType)) {
+              return '''${propertyData.property.displayName}:${propertyData.property.displayName} != null ? new ${propertyData.asImmutableDisplayName}(${propertyData.property.displayName}.map((${propertyData.genericType} entry) => entry is ${propertyData.genericType}Template<${propertyData.genericType}> ? new ${propertyData.genericType}${ClassBuilder.immutable_suffix}.fromMap(entry.mutations) : entry)) : null''';
+            } else {
+              return '''${propertyData.property.displayName}:${propertyData.property.displayName} != null ? new ${propertyData.asImmutableDisplayName}(${propertyData.property.displayName}) : null''';
+            }
+          } else return '''${propertyData.property.displayName}:${propertyData.property.displayName}''';
         })
         .join(', ');
 
@@ -128,9 +146,19 @@ class ImmutableImplementation extends ClassBuilder {
 
   String writeFromLensFactoryConstructor() {
     final StringBuffer buffer = new StringBuffer();
+    final Iterable<String> genericClassTypes = utils.getRecursiveAlphabetizedProperties(element)
+        .map(utils.getPropertyData)
+        .where((utils.PropertyData propertyData) => propertyData.isGenericClassType)
+        .map((utils.PropertyData propertyData) => propertyData.asInterfaceDisplayName);
 
-    buffer.writeln('factory $className.fromLens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
-    buffer.writeln('final ${element.displayName}Template<${element.displayName}> template = new ${element.displayName}Template<${element.displayName}>(null);');
+    if (genericClassTypes.isNotEmpty) {
+      buffer.writeln('factory $className.fromLens(void predicate(${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}> template)) {');
+      buffer.writeln('final ${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}> template = new ${element.displayName}Template<${element.displayName}<${genericClassTypes.join(', ')}>, ${genericClassTypes.join(', ')}>(null);');
+    } else {
+      buffer.writeln('factory $className.fromLens(void predicate(${element.displayName}Template<${element.displayName}> template)) {');
+      buffer.writeln('final ${element.displayName}Template<${element.displayName}> template = new ${element.displayName}Template<${element.displayName}>(null);');
+    }
+
     buffer.writeln('predicate(template);');
     buffer.writeln('return new $className.fromMap(template.mutations);');
     buffer.writeln('}');

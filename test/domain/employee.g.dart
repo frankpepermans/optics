@@ -24,7 +24,8 @@ abstract class EmployeeProps {
 }
 
 /// The immutable implementation of [Employee]
-class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
+class EmployeeImmutable extends PersonWithAddressImmutable
+    implements Employee, Comparable {
   @override
   final int id;
   @override
@@ -95,7 +96,7 @@ class EmployeeImmutable extends PersonWithAddressImmutable implements Employee {
 
 /// The mutable interface for [Employee]
 abstract class EmployeeMutable extends Employee
-    with PersonWithAddressMutable, PersonMutable {
+    with PersonWithAddressMutable, PersonMutable, Comparable {
   @override
   int get id;
   set id(int value);
@@ -107,7 +108,7 @@ abstract class EmployeeMutable extends Employee
 
 /// The template implementation of [EmployeeMutable]
 class EmployeeTemplate<T extends Employee> extends PersonWithAddressTemplate<T>
-    implements EmployeeMutable {
+    implements EmployeeMutable, Comparable {
   @override
   int get id => mutations['id'];
   @override
@@ -140,4 +141,6 @@ class EmployeeTemplate<T extends Employee> extends PersonWithAddressTemplate<T>
       'id': mutations['id'],
       'reportsTo': mutations['reportsTo']
     });
+  @override
+  int compareTo(dynamic other) => -1;
 }

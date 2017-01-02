@@ -45,7 +45,11 @@ class TemplateImplementation extends ClassBuilder {
     } else if (propertyData is utils.ListData) {
       buffer.writeln('@override ${propertyData.asMutableDisplayName} get ${property.displayName} {');
       buffer.writeln('''if (mutations['${property.displayName}'] == null) mutations['${property.displayName}'] = <${propertyData.genericType}>[];''');
-      buffer.writeln('''if (mutations['${property.displayName}'].firstWhere((${propertyData.genericType} entry) => entry is! ${propertyData.genericType}Template<${propertyData.genericType}>, orElse: () => null) != null) mutations['${property.displayName}'] = mutations['${property.displayName}'].map((${propertyData.genericType} entry) => entry is ${propertyData.genericType}Template<${propertyData.genericType}> ? entry : new ${propertyData.genericType}Template<${propertyData.genericType}>(entry)).toList();''');
+
+      if (utils.isCustomObject(element, propertyData.genericType)) {
+        buffer.writeln('''if (mutations['${property.displayName}'].firstWhere((${propertyData.genericType} entry) => entry is! ${propertyData.genericType}Template<${propertyData.genericType}>, orElse: () => null) != null) mutations['${property.displayName}'] = mutations['${property.displayName}'].map((${propertyData.genericType} entry) => entry is ${propertyData.genericType}Template<${propertyData.genericType}> ? entry : new ${propertyData.genericType}Template<${propertyData.genericType}>(entry)).toList();''');
+      }
+
       buffer.writeln('''return mutations['${property.displayName}'];}''');
     } else {
       buffer.writeln('''@override ${propertyData.asMutableDisplayName} get ${property.displayName} => mutations['${property.displayName}'];''');
@@ -66,9 +70,17 @@ class TemplateImplementation extends ClassBuilder {
     final String args = utils.getAlphabetizedProperties(element)
         .map(utils.getPropertyData)
         .map((utils.PropertyData propertyData) {
-          if (propertyData is utils.CustomObjectData) return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}>(source.${propertyData.property.displayName}) : null''';
-          else if (propertyData is utils.ListData) return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asMutableDisplayName}.from(source.${propertyData.property.displayName}.map((${propertyData.genericType} entry) => new ${propertyData.genericType}Template<${propertyData.genericType}>(entry))) : null''';
-          return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName}''';
+          if (propertyData is utils.CustomObjectData) {
+            return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asInterfaceDisplayName}Template<${propertyData.asInterfaceDisplayName}>(source.${propertyData.property.displayName}) : null''';
+          } else if (propertyData is utils.ListData) {
+            if (utils.isCustomObject(element, propertyData.genericType)) {
+              return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asMutableDisplayName}.from(source.${propertyData.property.displayName}.map((${propertyData.genericType} entry) => new ${propertyData.genericType}Template<${propertyData.genericType}>(entry))) : null''';
+            } else {
+              return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName} != null ? new ${propertyData.asMutableDisplayName}.from(source.${propertyData.property.displayName}) : null''';
+            }
+          } else {
+            return '''mutations['${propertyData.property.displayName}'] = source?.${propertyData.property.displayName}''';
+          }
         })
         .join(';');
 

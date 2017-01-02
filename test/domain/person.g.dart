@@ -21,7 +21,7 @@ abstract class PersonProps {
 }
 
 /// The immutable implementation of [Person]
-class PersonImmutable implements Person {
+class PersonImmutable implements Person, Comparable {
   @override
   final String firstName;
   @override
@@ -62,7 +62,7 @@ class PersonImmutable implements Person {
 }
 
 /// The mutable interface for [Person]
-abstract class PersonMutable extends Person {
+abstract class PersonMutable extends Person with Comparable {
   @override
   String get firstName;
   set firstName(String value);
@@ -73,7 +73,7 @@ abstract class PersonMutable extends Person {
 }
 
 /// The template implementation of [PersonMutable]
-class PersonTemplate<T extends Person> implements PersonMutable {
+class PersonTemplate<T extends Person> implements PersonMutable, Comparable {
   final T source;
   final Map<String, dynamic> mutations = <String, dynamic>{};
 
@@ -100,4 +100,6 @@ class PersonTemplate<T extends Person> implements PersonMutable {
         'firstName': mutations['firstName'],
         'lastName': mutations['lastName']
       };
+  @override
+  int compareTo(dynamic other) => -1;
 }

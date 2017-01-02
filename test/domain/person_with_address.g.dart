@@ -22,10 +22,12 @@ abstract class PersonWithAddressProps {
 
 /// The immutable implementation of [PersonWithAddress]
 class PersonWithAddressImmutable extends PersonImmutable
-    implements PersonWithAddress {
+    implements PersonWithAddress, Comparable {
   @override
   final Address address;
-  const PersonWithAddressImmutable({this.address});
+  const PersonWithAddressImmutable(
+      {this.address, String firstName, String lastName})
+      : super(firstName: firstName, lastName: lastName);
 
   factory PersonWithAddressImmutable.fromMap(Map<String, dynamic> source) {
     final Address address = source['address'];
@@ -49,6 +51,7 @@ class PersonWithAddressImmutable extends PersonImmutable
     return new PersonWithAddressImmutable.fromMap(template.mutations);
   }
 
+  @override
   PersonWithAddressImmutable lens(
       void predicate(PersonWithAddressTemplate<PersonWithAddress> template)) {
     final PersonWithAddressTemplate<PersonWithAddress> template =
@@ -57,10 +60,12 @@ class PersonWithAddressImmutable extends PersonImmutable
     return new PersonWithAddressImmutable.fromMap(template.mutations);
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{'address': this.address};
+  @override
+  Map<String, dynamic> toJson() =>
+      super.toJson()..addAll(<String, dynamic>{'address': this.address});
   @override
   int compareTo(dynamic other) {
-    if (other is PersonWithAddress) {
+    if (other is PersonWithAddress && super.compareTo(other) == 0) {
       return (compareObjects(address, other?.address) == 0) ? 0 : 1;
     }
     return -1;
@@ -69,7 +74,7 @@ class PersonWithAddressImmutable extends PersonImmutable
 
 /// The mutable interface for [PersonWithAddress]
 abstract class PersonWithAddressMutable extends PersonWithAddress
-    with PersonMutable {
+    with PersonMutable, Comparable {
   @override
   AddressMutable get address;
   set address(Address value);
@@ -77,10 +82,7 @@ abstract class PersonWithAddressMutable extends PersonWithAddress
 
 /// The template implementation of [PersonWithAddressMutable]
 class PersonWithAddressTemplate<T extends PersonWithAddress>
-    extends PersonTemplate<T> implements PersonWithAddressMutable {
-  final T source;
-  final Map<String, dynamic> mutations = <String, dynamic>{};
-
+    extends PersonTemplate<T> implements PersonWithAddressMutable, Comparable {
   @override
   AddressMutable get address {
     if (mutations['address'] == null)
@@ -93,12 +95,15 @@ class PersonWithAddressTemplate<T extends PersonWithAddress>
     mutations['address'] = value;
   }
 
-  PersonWithAddressTemplate(this.source) {
+  PersonWithAddressTemplate(T source) : super(source) {
     mutations['address'] = source?.address != null
         ? new AddressTemplate<Address>(source.address)
         : null;
   }
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'address': mutations['address']};
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll(<String, dynamic>{'address': mutations['address']});
+  @override
+  int compareTo(dynamic other) => -1;
 }

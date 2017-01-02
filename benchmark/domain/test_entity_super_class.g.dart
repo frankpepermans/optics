@@ -19,7 +19,8 @@ abstract class TestEntitySuperClassProps {
 }
 
 /// The immutable implementation of [TestEntitySuperClass]
-class TestEntitySuperClassImmutable implements TestEntitySuperClass {
+class TestEntitySuperClassImmutable
+    implements TestEntitySuperClass, Comparable {
   @override
   final int id;
   const TestEntitySuperClassImmutable({this.id});
@@ -58,7 +59,8 @@ class TestEntitySuperClassImmutable implements TestEntitySuperClass {
 }
 
 /// The mutable interface for [TestEntitySuperClass]
-abstract class TestEntitySuperClassMutable extends TestEntitySuperClass {
+abstract class TestEntitySuperClassMutable extends TestEntitySuperClass
+    with Comparable {
   @override
   int get id;
   set id(int value);
@@ -66,7 +68,7 @@ abstract class TestEntitySuperClassMutable extends TestEntitySuperClass {
 
 /// The template implementation of [TestEntitySuperClassMutable]
 class TestEntitySuperClassTemplate<T extends TestEntitySuperClass>
-    implements TestEntitySuperClassMutable {
+    implements TestEntitySuperClassMutable, Comparable {
   final T source;
   final Map<String, dynamic> mutations = <String, dynamic>{};
 
@@ -82,4 +84,6 @@ class TestEntitySuperClassTemplate<T extends TestEntitySuperClass>
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{'id': mutations['id']};
+  @override
+  int compareTo(dynamic other) => -1;
 }

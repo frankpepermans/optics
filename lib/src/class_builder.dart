@@ -50,22 +50,44 @@ class ClassBuilder {
     final StringBuffer buffer = new StringBuffer();
     final List<String> allExtends = new List<String>()..addAll(extendsList)..addAll(customExtendsList);
     final List<String> allImplements = new List<String>()..addAll(implementsList)..addAll(customImplementsList);
+    final Iterable<String> genericClassTypes = utils.getRecursiveAlphabetizedProperties(element)
+        .map(utils.getPropertyData)
+        .where((utils.PropertyData propertyData) => propertyData.isGenericClassType)
+        .map((utils.PropertyData propertyData) => propertyData.asInterfaceDisplayName);
 
     if (allExtends.contains('Comparable')) {
       allExtends.remove('Comparable');
       allImplements.add('Comparable');
     }
+    final allGenericTypes = new List<String>()
+      ..addAll(genericTypes)
+      ..addAll(genericClassTypes);
 
     final List<String> allMixins = new List<String>()..addAll(customMixinsList)..addAll(extendsList.length > 1 ? extendsList.sublist(1) : const []);
-    final String extendsPart = allExtends.isNotEmpty ? allExtends.first : '';
-    final String implementsPart = allImplements.join(', ');
+    String extendsPart = allExtends.isNotEmpty ? allExtends.first : '';
+    final String implementsPart = allImplements
+        .map((String value) {
+          if (genericClassTypes.isNotEmpty && (
+              value == element.displayName ||
+              value == '${element.displayName}$immutable_suffix' ||
+              value == '${element.displayName}$mutable_suffix' ||
+              value == '${element.displayName}Template')) {
+            return '$value<${genericClassTypes.join(', ')}>';
+          }
+
+          return value;
+        })
+        .join(', ');
+
+    if (genericClassTypes.isNotEmpty && extendsPart == element.displayName || extendsPart == '${element.displayName}$immutable_suffix' || extendsPart == '${element.displayName}$mutable_suffix' || extendsPart == '${element.displayName}Template')
+      extendsPart = '$extendsPart<${genericClassTypes.join(', ')}>';
 
     buffer.writeln('/// $comment');
 
     if (isAbstract) buffer.write('abstract ');
 
-    if (genericTypes.isEmpty) buffer.write('class $className ');
-    else buffer.write('class $className<${genericTypes.join(', ')}> ');
+    if (allGenericTypes.isEmpty) buffer.write('class $className ');
+    else buffer.write('class $className<${allGenericTypes.join(', ')}> ');
 
     if (extendsPart.isNotEmpty) buffer.write(' extends $extendsPart');
 

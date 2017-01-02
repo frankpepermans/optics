@@ -27,7 +27,7 @@ abstract class CompanyProps {
 }
 
 /// The immutable implementation of [Company]
-class CompanyImmutable implements Company {
+class CompanyImmutable implements Company, Comparable {
   @override
   final String name;
   @override
@@ -96,7 +96,7 @@ class CompanyImmutable implements Company {
 }
 
 /// The mutable interface for [Company]
-abstract class CompanyMutable extends Company {
+abstract class CompanyMutable extends Company with Comparable {
   @override
   String get name;
   set name(String value);
@@ -115,7 +115,7 @@ abstract class CompanyMutable extends Company {
 }
 
 /// The template implementation of [CompanyMutable]
-class CompanyTemplate<T extends Company> implements CompanyMutable {
+class CompanyTemplate<T extends Company> implements CompanyMutable, Comparable {
   final T source;
   final Map<String, dynamic> mutations = <String, dynamic>{};
 
@@ -183,4 +183,6 @@ class CompanyTemplate<T extends Company> implements CompanyMutable {
         'founded': mutations['founded'],
         'name': mutations['name']
       };
+  @override
+  int compareTo(dynamic other) => -1;
 }

@@ -25,7 +25,7 @@ abstract class AddressProps {
 }
 
 /// The immutable implementation of [Address]
-class AddressImmutable implements Address {
+class AddressImmutable implements Address, Comparable {
   @override
   final String street;
   @override
@@ -81,7 +81,7 @@ class AddressImmutable implements Address {
 }
 
 /// The mutable interface for [Address]
-abstract class AddressMutable extends Address {
+abstract class AddressMutable extends Address with Comparable {
   @override
   String get street;
   set street(String value);
@@ -100,7 +100,7 @@ abstract class AddressMutable extends Address {
 }
 
 /// The template implementation of [AddressMutable]
-class AddressTemplate<T extends Address> implements AddressMutable {
+class AddressTemplate<T extends Address> implements AddressMutable, Comparable {
   final T source;
   final Map<String, dynamic> mutations = <String, dynamic>{};
 
@@ -145,4 +145,6 @@ class AddressTemplate<T extends Address> implements AddressMutable {
         'street': mutations['street'],
         'town': mutations['town']
       };
+  @override
+  int compareTo(dynamic other) => -1;
 }

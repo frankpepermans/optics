@@ -8,6 +8,7 @@ import 'package:optics/src/properties_implementation.dart';
 import 'package:optics/src/immutable_implementation.dart';
 import 'package:optics/src/abstract_mutable_implementation.dart';
 import 'package:optics/src/template_implementation.dart';
+import 'package:optics/src/element_utils.dart' as utils;
 
 class OpticsGenerator extends Generator {
 
@@ -25,36 +26,17 @@ class OpticsGenerator extends Generator {
         buffer.writeln('''import 'dart:collection';''');
         buffer.writeln();
 
-        final List<ClassElement> hierarchy = new List<ClassElement>()
-          ..add(element)
-          ..addAll(element.allSupertypes.map((InterfaceType type) => type.element));
-        final Set<String> hierarchyImports = new Set<String>();
-        final Set<String> packageImports = new Set<String>();
-
-        hierarchy.forEach((ClassElement element) {
-          new RegExp(r'''import ['"]{1}([^'"]+)['"]{1};''')
-              .allMatches(element.enclosingElement.source.contents.data)
-              .forEach((Match match) {
-            if (!match.group(1).startsWith('package:')) {
-              final List<String> parts = match.group(1).split('.')
-                ..removeLast()
-                ..add('g.dart');
-              hierarchyImports.add('''import '${parts.join('.')}';''');
-            } else {
-              packageImports.add(match.group(0));
-            }
-          });
-        });
+        final List<Set<String>> imports = utils.getImports(element);
 
         buffer.writeln();
 
-        final List<String> packagesAsList = packageImports.toList(growable: false)..sort();
+        final List<String> packagesAsList = imports.last.toList(growable: false)..sort();
 
         buffer.writeln(packagesAsList.join(''));
         buffer.writeln();
         buffer.writeln('''import '${element.enclosingElement.displayName}';''');
 
-        final List<String> hierarchyAsList = hierarchyImports.toList(growable: false)..sort();
+        final List<String> hierarchyAsList = imports.first.toList(growable: false)..sort();
 
         buffer.writeln(hierarchyAsList.join(''));
 

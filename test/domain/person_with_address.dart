@@ -5,6 +5,5 @@ import 'person.dart';
 
 @optics
 abstract class PersonWithAddress extends Person {
-
   Address get address;
 }
